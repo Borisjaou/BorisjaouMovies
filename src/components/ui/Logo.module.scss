@@ -1,0 +1,45 @@
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.dot {
+  flex-shrink: 0;
+  background: var(--accent);
+}
+
+.mobile {
+  font-size: 22px;
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+  }
+}
+
+.desktop {
+  font-size: 24px;
+
+  .dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 7px;
+  }
+}
+
+.auth {
+  font-size: 26px;
+
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+  }
+}

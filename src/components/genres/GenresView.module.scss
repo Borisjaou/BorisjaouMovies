@@ -1,0 +1,85 @@
+@use "breakpoints" as bp;
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px var(--gutter) 12px;
+  background: var(--bg);
+}
+
+.mTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.searchForm {
+  flex-grow: 1;
+  display: flex;
+}
+
+.main {
+  flex-grow: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 4px var(--gutter) 24px;
+
+  @include bp.from(lg) {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 32px 40px 56px;
+  }
+}
+
+.dHead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.dTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.dCount {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* README «Адаптив»: 2 → 3 (600) → 3 (1024) → 4 (1280) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  @include bp.from(sm) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include bp.from(lg) {
+    gap: 20px;
+  }
+
+  @include bp.from(xl) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

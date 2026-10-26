@@ -1,0 +1,128 @@
+@use "breakpoints" as bp;
+
+/* Main.dc.html / DeskAuth.dc.html: вкладки, форма, «или», соцсети */
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 16px;
+  background: var(--soft);
+}
+
+.tab {
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.tabOn {
+  background: var(--surface);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+
+  @include bp.from(lg) {
+    gap: 16px;
+  }
+}
+
+.forgot {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--link);
+  text-decoration: none;
+
+  @include bp.from(lg) {
+    font-size: 14px;
+  }
+}
+
+.passWrap {
+  position: relative;
+}
+
+.passInput {
+  padding-right: 56px;
+}
+
+.eye {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.submit {
+  height: 54px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+
+  @include bp.from(lg) {
+    font-size: 14px;
+  }
+}
+
+.line {
+  flex-grow: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.socials {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social {
+  height: 50px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+}

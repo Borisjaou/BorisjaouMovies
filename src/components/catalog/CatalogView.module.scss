@@ -1,0 +1,333 @@
+@use "breakpoints" as bp;
+
+/* Мобила — Catalog.dc.html (растягивается до 1023px), ПК — DeskCatalog.dc.html */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Мобильная шапка ---------- */
+.mHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px var(--gutter) 12px;
+  background: var(--bg);
+}
+
+.mTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mTopActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mAdmin {
+  height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.mSearchRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mFilters {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* ---------- Раскладка ---------- */
+.layout {
+  flex-grow: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  display: flex;
+
+  @include bp.from(lg) {
+    gap: 40px;
+    padding: 32px 40px 56px;
+    align-items: flex-start;
+  }
+}
+
+.main {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 4px 0 24px;
+
+  @include bp.from(lg) {
+    gap: 32px;
+    padding: 0;
+  }
+}
+
+.mChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 var(--gutter);
+  flex-shrink: 0;
+}
+
+/* ---------- Новинки ---------- */
+.fresh {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+
+  @include bp.from(lg) {
+    gap: 16px;
+  }
+}
+
+.freshHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 var(--gutter);
+
+  @include bp.from(lg) {
+    padding: 0;
+  }
+}
+
+.freshTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+
+  @include bp.from(lg) {
+    font-size: 34px;
+    letter-spacing: 0;
+  }
+}
+
+.freshAll {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.freshRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 var(--gutter);
+
+  @include bp.from(lg) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    overflow: visible;
+    padding: 0;
+
+    /* На ПК три новинки (slice(0, 3) в DeskCatalog) */
+    > :nth-child(n + 4) {
+      display: none;
+    }
+  }
+}
+
+/* ---------- Каталог ---------- */
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 var(--gutter);
+
+  @include bp.from(lg) {
+    gap: 18px;
+    padding: 0;
+  }
+}
+
+.mCatalogHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mCatalogTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.mSort {
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.mCount {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dCatalogHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dHeading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.dCatalogTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.dCount {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.dChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- Сетка: README «Адаптив» ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 12px;
+
+  @include bp.from(sm) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include bp.from(lg) {
+    gap: 32px 24px;
+  }
+
+  @include bp.from(xl) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Пустое состояние ---------- */
+.mEmpty,
+.dEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--soft);
+  text-align: center;
+}
+
+.mEmpty {
+  padding: 32px 16px;
+  border-radius: 20px;
+}
+
+.dEmpty {
+  padding: 64px 24px;
+  border-radius: 24px;
+}
+
+.mEmptyTitle,
+.dEmptyTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.mEmptyTitle {
+  font-size: 16px;
+}
+
+.dEmptyTitle {
+  font-size: 20px;
+}
+
+.mEmptyText {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.dEmptyText {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.mEmptyButton,
+.dEmptyButton {
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.mEmptyButton {
+  height: 44px;
+  padding: 0 18px;
+  font-size: 14px;
+}
+
+.dEmptyButton {
+  margin-top: 6px;
+  height: 46px;
+  padding: 0 20px;
+  font-size: 15px;
+}

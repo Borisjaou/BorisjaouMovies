@@ -1,0 +1,561 @@
+@use "breakpoints" as bp;
+
+.page {
+  min-height: 100dvh;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---------- Общие: теги и рейтинг (мобила / ПК) ---------- */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 400;
+
+  @include bp.from(lg) {
+    gap: 8px;
+    font-size: 14px;
+  }
+}
+
+.tag {
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--soft);
+
+  @include bp.from(lg) {
+    padding: 7px 12px;
+  }
+}
+
+.tagOutline {
+  background: transparent;
+  border: 1px solid var(--line);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+
+  @include bp.from(lg) {
+    font-size: 15px;
+  }
+}
+
+.star {
+  flex-shrink: 0;
+  color: var(--star);
+
+  @include bp.from(lg) {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.ratingValue {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+
+  @include bp.from(lg) {
+    font-size: 22px;
+  }
+}
+
+.heartOn {
+  color: var(--heart);
+}
+
+/* ================= Мобила ================= */
+.m {
+  position: relative;
+}
+
+.mTopBar {
+  position: fixed;
+  z-index: 20;
+  top: 16px;
+  left: var(--gutter);
+  right: var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.glassButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--glass);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mHero {
+  position: relative;
+  height: 400px;
+  overflow: hidden;
+}
+
+.mHeroCircle {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 150px;
+  right: -90px;
+  top: 40px;
+  background: var(--shape);
+}
+
+.mHeroArch {
+  position: absolute;
+  width: 120px;
+  height: 180px;
+  border-radius: 60px 60px 0 0;
+  left: 36px;
+  bottom: 30px;
+  background: var(--shape);
+}
+
+.mHeroTitle {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 56px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--poster-ink);
+}
+
+.mSheet {
+  position: relative;
+  margin-top: -28px;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
+  padding: 24px var(--gutter) 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0;
+}
+
+.mActions {
+  display: flex;
+  gap: 10px;
+}
+
+.mTrailer {
+  flex-grow: 1;
+  height: 54px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.mSquare {
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &.heartOn {
+    color: var(--heart);
+  }
+}
+
+.mFavStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--soft);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.mFavOpen {
+  margin-left: auto;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.mSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mCrewSection {
+  gap: 10px;
+}
+
+.mH2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.mText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.mCrew {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.mCrewRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mCrewValue {
+  font-weight: 400;
+  text-align: right;
+}
+
+/* ================= ПК ================= */
+.dHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: var(--nav);
+}
+
+.dHeaderInner {
+  max-width: var(--container-max);
+  /* 76 вместе с нижней границей шапки, как в эталоне (box-sizing: border-box) */
+  height: 75px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 40px;
+}
+
+.dBack {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.dHeaderActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dContent {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  padding: 40px 120px 64px;
+}
+
+.dTop {
+  display: flex;
+  gap: 56px;
+  align-items: flex-start;
+}
+
+.dPoster {
+  position: relative;
+  width: 380px;
+  height: 560px;
+  flex-shrink: 0;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.dPosterCircle {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 160px;
+  right: -110px;
+  top: 30px;
+  background: var(--shape);
+}
+
+.dPosterArch {
+  position: absolute;
+  width: 140px;
+  height: 220px;
+  border-radius: 70px 70px 0 0;
+  left: 40px;
+  bottom: 0;
+  background: var(--shape);
+}
+
+.dPosterTitle {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 36px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--poster-ink);
+}
+
+.dInfo {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 8px;
+}
+
+.dIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.dAbout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 680px;
+}
+
+.dH2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.dText {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.dActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dTrailer,
+.dButton {
+  height: 56px;
+  border-radius: 18px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dTrailer {
+  padding: 0 28px;
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.dButton {
+  padding: 0 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.dCrew {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px 24px;
+  max-width: 680px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+
+  dd {
+    margin: 0;
+    font-weight: 400;
+  }
+}
+
+.dCrewRow {
+  display: contents;
+}
+
+/* ---------- Похожие фильмы: 4 колонки (1024–1279), 5 (≥1280) ---------- */
+.dSimilar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dSimilarTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.dSimilarGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+
+  /* Один ряд: при 4 колонках пятый фильм не показываем */
+  > :nth-child(n + 5) {
+    display: none;
+  }
+
+  @include bp.from(xl) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    > :nth-child(5) {
+      display: flex;
+    }
+  }
+}
+
+.dSimilarCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.dSimilarPoster {
+  position: relative;
+  height: 290px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.dSimilarShape {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 90px;
+  right: -60px;
+  top: -40px;
+  background: var(--shape);
+}
+
+.dSimilarName {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  color: var(--poster-ink);
+}
+
+.dSimilarMeta {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.dSimilarDesc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

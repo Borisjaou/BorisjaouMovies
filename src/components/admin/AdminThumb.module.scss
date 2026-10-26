@@ -1,0 +1,26 @@
+.thumb {
+  position: relative;
+  width: 48px;
+  height: 68px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.shape {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 27px;
+  right: -20px;
+  top: -10px;
+  background: var(--shape);
+}
+
+.img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

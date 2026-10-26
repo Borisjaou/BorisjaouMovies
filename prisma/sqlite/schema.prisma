@@ -1,0 +1,84 @@
+// СГЕНЕРИРОВАНО `npm run db:sync` из prisma/schema.prisma — не редактировать.
+// Только общие для обеих баз типы: без enum и массивов, роли и статусы — строки.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  /// null — вход только через Google
+  passwordHash String?
+  /// "user" | "admin"
+  role         String     @default("user")
+  googleLinked Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  favorites    Favorite[]
+}
+
+model Film {
+  id               Int         @id @default(autoincrement())
+  slug             String      @unique
+  title            String
+  originalTitle    String?
+  year             Int
+  rating           Float?
+  durationMin      Int?
+  /// "0+" | "6+" | "12+" | "16+" | "18+"
+  ageRating        String?
+  country          String?
+  director         String?
+  /// Актёры, по одному на строку
+  cast             String      @default("")
+  shortDescription String      @default("")
+  description      String      @default("")
+  /// 1–6: цвет постера posters[0..5]
+  posterColor      Int
+  /// 0–2: фигура на постере
+  posterShape      Int         @default(0)
+  posterUrl        String?
+  trailerUrl       String?
+  isNew            Boolean     @default(false)
+  /// "published" | "draft"
+  status           String      @default("draft")
+  popularity       Int         @default(0)
+  /// Название, режиссёр и актёры в нижнем регистре — для поиска без учёта регистра в обеих базах
+  searchText       String      @default("")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  genres           FilmGenre[]
+  favorites        Favorite[]
+
+  @@index([status, popularity])
+  @@index([status, rating])
+  @@index([status, year])
+}
+
+model FilmGenre {
+  filmId   Int
+  genre    String
+  /// Порядок жанров: первый показывается в карточке
+  position Int    @default(0)
+  film     Film   @relation(fields: [filmId], references: [id], onDelete: Cascade)
+
+  @@id([filmId, genre])
+  @@index([genre])
+}
+
+model Favorite {
+  userId    String
+  filmId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  film      Film     @relation(fields: [filmId], references: [id], onDelete: Cascade)
+
+  @@id([userId, filmId])
+  @@index([filmId])
+}

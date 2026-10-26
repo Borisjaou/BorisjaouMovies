@@ -1,0 +1,32 @@
+/* Кнопка «Войти» / «Выйти» — как «Войти» в шапке DeskCatalog */
+.button {
+  height: 44px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+/* Имя вошедшего: текст пунктов навигации (15px), приглушённый */
+.name {
+  max-width: 180px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

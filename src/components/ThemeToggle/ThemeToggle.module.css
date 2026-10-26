@@ -1,0 +1,34 @@
+.toggle {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 22px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.outline {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.glass {
+  border: 0;
+  background: var(--glass);
+}
+
+.sun {
+  display: none;
+}
+
+:global([data-theme="dark"]) .sun {
+  display: block;
+}
+
+:global([data-theme="dark"]) .moon {
+  display: none;
+}

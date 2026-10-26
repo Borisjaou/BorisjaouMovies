@@ -1,0 +1,36 @@
+.chip {
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.md {
+  padding: 0 16px;
+}
+
+.sm {
+  padding: 0 14px;
+}
+
+.age {
+  width: 56px;
+  padding: 0;
+}
+
+.on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}

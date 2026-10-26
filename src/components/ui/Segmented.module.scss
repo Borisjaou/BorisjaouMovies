@@ -1,0 +1,45 @@
+.group {
+  gap: 4px;
+  padding: 4px;
+  border-radius: 16px;
+  background: var(--soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--seg-cols), minmax(0, 1fr));
+}
+
+.inline {
+  display: flex;
+}
+
+.item {
+  height: var(--seg-h);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--seg-fs);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.inline .item {
+  padding: 0 14px;
+}
+
+.on {
+  background: var(--surface);
+}
+
+.compact {
+  gap: 3px;
+  padding: 3px;
+  border-radius: 14px;
+
+  .item {
+    border-radius: 11px;
+  }
+}

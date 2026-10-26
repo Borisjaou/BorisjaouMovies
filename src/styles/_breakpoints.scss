@@ -1,0 +1,40 @@
+// Брейкпоинты из README эталона (раздел «Адаптив»).
+// Подключение в *.module.scss:  @use "breakpoints" as bp;
+//   @include bp.from(md) { ... }   → @media (min-width: 768px)
+//   @include bp.below(lg) { ... }  → @media (max-width: 1023px)
+
+@use "sass:map";
+
+$breakpoints: (
+  sm: 600px,  // каталог и жанры: 3 колонки на мобильной раскладке
+  md: 768px,  // боковые отступы 20 → 32
+  lg: 1024px, // десктопная раскладка
+  xl: 1280px, // каталог и жанры 4 колонки, «Похожие» 5
+);
+
+$container-max: 1440px;
+
+@function get($name) {
+  @if not map.has-key($breakpoints, $name) {
+    @error "Неизвестный брейкпоинт `#{$name}`. Доступны: #{map.keys($breakpoints)}";
+  }
+  @return map.get($breakpoints, $name);
+}
+
+@mixin from($name) {
+  @media (min-width: get($name)) {
+    @content;
+  }
+}
+
+@mixin below($name) {
+  @media (max-width: get($name) - 1px) {
+    @content;
+  }
+}
+
+@mixin between($from, $to) {
+  @media (min-width: get($from)) and (max-width: get($to) - 1px) {
+    @content;
+  }
+}

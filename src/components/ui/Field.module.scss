@@ -1,0 +1,37 @@
+@use "breakpoints" as bp;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.label,
+.error {
+  font-size: 13px;
+  font-weight: 400;
+
+  @include bp.from(lg) {
+    font-size: 14px;
+  }
+}
+
+.label {
+  color: var(--muted);
+}
+
+.error {
+  margin: 0;
+  color: var(--err);
+}
+
+/* Как у полей с ошибкой в AdminAdd: рамка --err */
+.invalid :is(input, select, textarea) {
+  border-color: var(--err);
+}

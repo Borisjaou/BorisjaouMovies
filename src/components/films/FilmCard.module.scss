@@ -1,0 +1,187 @@
+@use "breakpoints" as bp;
+
+/* Мобила — Catalog.dc.html, ПК — DeskCatalog.dc.html */
+
+.card {
+  position: relative;
+  min-width: 0;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: none;
+
+  @include bp.from(lg) {
+    gap: 10px;
+  }
+}
+
+.poster {
+  position: relative;
+  aspect-ratio: 169 / 236;
+  border-radius: 18px;
+  overflow: hidden;
+
+  @include bp.from(lg) {
+    aspect-ratio: 246 / 340;
+    border-radius: 22px;
+  }
+}
+
+.shape {
+  position: absolute;
+  background: var(--shape);
+}
+
+/* SHAPES[0..2]: мобила / ПК */
+.shape0 {
+  width: 150px;
+  height: 150px;
+  border-radius: 75px;
+  left: -40px;
+  top: 28px;
+
+  @include bp.from(lg) {
+    width: 210px;
+    height: 210px;
+    border-radius: 105px;
+    left: -60px;
+    top: 40px;
+  }
+}
+
+.shape1 {
+  width: 96px;
+  height: 150px;
+  border-radius: 48px 48px 0 0;
+  left: 60px;
+  top: 86px;
+
+  @include bp.from(lg) {
+    width: 130px;
+    height: 210px;
+    border-radius: 65px 65px 0 0;
+    left: 90px;
+    top: 130px;
+  }
+}
+
+.shape2 {
+  width: 190px;
+  height: 190px;
+  border-radius: 95px;
+  left: 60px;
+  top: -70px;
+
+  @include bp.from(lg) {
+    width: 260px;
+    height: 260px;
+    border-radius: 130px;
+    left: 90px;
+    top: -100px;
+  }
+}
+
+.title {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--poster-ink);
+
+  @include bp.from(lg) {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+
+  @include bp.from(lg) {
+    font-size: 14px;
+  }
+}
+
+.star {
+  /* Без flex-shrink: 0 — в узкой карточке звезда сжимается, как в эталоне */
+  color: var(--star);
+
+  @include bp.from(lg) {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.rating {
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @include bp.from(lg) {
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+  }
+}
+
+.actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+
+  @include bp.from(lg) {
+    top: 12px;
+    right: 12px;
+  }
+}
+
+.glass {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: var(--glass);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.favOn {
+  color: var(--heart);
+}
+
+.share {
+  @include bp.below(lg) {
+    display: none;
+  }
+}

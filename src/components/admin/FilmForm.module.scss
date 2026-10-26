@@ -1,0 +1,519 @@
+@use "breakpoints" as bp;
+
+/* Мобила — AdminAdd.dc.html (растягивается до 1023px), ПК — DeskAdminAdd.dc.html */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= Мобила ================= */
+.mobile {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px var(--gutter) 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.mBack {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mTitle {
+  margin: 0;
+  flex-grow: 1;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.mMain {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px var(--gutter) 28px;
+}
+
+.mTopSection {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.mPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+
+  .previewLabel {
+    font-size: 12px;
+  }
+
+  .previewTitle {
+    font-size: 18px;
+  }
+
+  .previewMeta {
+    font-size: 13px;
+  }
+
+  .previewDesc {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .previewLink {
+    font-size: 12px;
+  }
+}
+
+.mSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gap12 {
+  gap: 12px;
+}
+
+.mH2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+
+  .genreHint {
+    font-size: 13px;
+  }
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mFooter {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px var(--gutter) 20px;
+  border-top: 1px solid var(--line);
+  background: var(--nav);
+}
+
+/* ================= Общее ================= */
+.previewLabel {
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.previewTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  word-break: break-word;
+}
+
+.previewMeta {
+  color: var(--muted);
+}
+
+.previewDesc {
+  margin: 0;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.previewLink {
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.poster {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px dashed var(--dash);
+  background: var(--upload-bg);
+  color: var(--upload-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Фокус с клавиатуры на скрытом поле файла — рамка у зоны загрузки */
+.poster:has(+ input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mPoster {
+  width: 132px;
+  height: 196px;
+  flex-shrink: 0;
+  border-radius: 18px;
+
+  .posterShape {
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    right: -50px;
+    top: -30px;
+  }
+
+  .posterTitle {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  .posterHint {
+    font-size: 11px;
+    padding: 0 10px;
+  }
+}
+
+.dPoster {
+  height: 300px;
+  border-radius: 20px;
+
+  .posterShape {
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    right: -70px;
+    top: -50px;
+  }
+
+  .posterTitle {
+    font-size: 15px;
+  }
+
+  .posterHint {
+    font-size: 13px;
+  }
+}
+
+.dragOver {
+  border-color: var(--accent);
+}
+
+.posterShape {
+  position: absolute;
+  background: var(--shape);
+}
+
+.posterIcon,
+.posterTitle,
+.posterHint {
+  position: relative;
+}
+
+.posterTitle {
+  font-weight: 400;
+}
+
+.posterImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.posterError {
+  margin: 0;
+  font-size: 13px;
+  color: var(--err);
+
+  @include bp.from(lg) {
+    margin-top: -6px;
+    font-size: 14px;
+  }
+}
+
+.genreHint {
+  /* Шрифт заголовка (Oswald) с весом 400 — как span внутри h2 в эталоне */
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.genreHintErr {
+  color: var(--err);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.textarea {
+  padding: 12px 14px;
+  line-height: 1.45;
+  resize: vertical;
+
+  @include bp.from(lg) {
+    line-height: 1.5;
+  }
+}
+
+.counter {
+  font-size: 12px;
+  color: var(--muted);
+
+  @include bp.from(lg) {
+    font-size: 13px;
+  }
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* 52 + рамка 1 × 2: в эталоне content-box */
+  min-height: 54px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.checkText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkTitle {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.checkHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dCheck {
+  /* 56 + рамка 1 × 2: в эталоне content-box */
+  min-height: 58px;
+  padding: 0 18px;
+  border-radius: 18px;
+
+  .checkbox {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.draftBtn,
+.publishBtn {
+  height: 54px;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.draftBtn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.publishBtn {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* ================= ПК ================= */
+.desktop {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  gap: 40px;
+  padding: 32px 80px 56px;
+  align-items: flex-start;
+}
+
+.dMain {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.dH2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+
+  .genreHint {
+    font-size: 14px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dInput {
+  background: var(--field);
+}
+
+.dChip:not([aria-pressed="true"]) {
+  background: var(--field);
+}
+
+.dAgeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dAgeLabel {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.dAges {
+  /* 420 + padding 4 × 2: в эталоне content-box */
+  max-width: 428px;
+}
+
+.aside {
+  position: sticky;
+  /* 76 — шапка, 32 — отступ как в эталоне */
+  top: 108px;
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 66px;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+
+  .previewLabel {
+    font-size: 13px;
+  }
+
+  .previewTitle {
+    font-size: 20px;
+  }
+
+  .previewMeta {
+    font-size: 14px;
+  }
+
+  .previewDesc {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .previewLink {
+    margin-top: 4px;
+    font-size: 13px;
+  }
+}
+
+.dPreviewText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}

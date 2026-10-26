@@ -1,0 +1,15 @@
+@use "breakpoints" as bp;
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--err-bg);
+  color: var(--err);
+  font-size: 14px;
+  font-weight: 400;
+
+  @include bp.from(lg) {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+}

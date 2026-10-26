@@ -1,0 +1,279 @@
+@use "breakpoints" as bp;
+
+/* Мобила — шторка из Movie.dc.html; ПК — окно 520 из DeskMovie.dc.html */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  @include bp.from(lg) {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: var(--overlay);
+  cursor: pointer;
+}
+
+.dialog {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 10px var(--gutter) 28px;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
+  color: var(--ink);
+
+  @include bp.from(lg) {
+    width: 520px;
+    gap: 20px;
+    padding: 28px;
+    border-radius: 28px;
+  }
+}
+
+.handle {
+  align-self: center;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+
+  @include bp.from(lg) {
+    display: none;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+
+  @include bp.from(lg) {
+    font-size: 22px;
+  }
+}
+
+.close {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ---------- Фильм ---------- */
+.film {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @include bp.from(lg) {
+    gap: 14px;
+  }
+}
+
+.poster {
+  position: relative;
+  width: 52px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+
+  @include bp.from(lg) {
+    width: 60px;
+    height: 84px;
+    border-radius: 12px;
+  }
+}
+
+.posterShape {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  right: -24px;
+  top: -10px;
+  background: var(--shape);
+
+  @include bp.from(lg) {
+    width: 70px;
+    height: 70px;
+    border-radius: 35px;
+    right: -28px;
+    top: -12px;
+  }
+}
+
+.filmText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.filmTitle {
+  font-weight: 400;
+  font-size: 16px;
+
+  @include bp.from(lg) {
+    font-size: 17px;
+  }
+}
+
+.filmMeta {
+  font-size: 13px;
+  color: var(--muted);
+
+  @include bp.from(lg) {
+    font-size: 14px;
+  }
+}
+
+/* ---------- Ссылка ---------- */
+.link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+
+  @include bp.from(lg) {
+    padding-left: 16px;
+  }
+}
+
+.linkIcon {
+  flex-shrink: 0;
+  color: var(--muted);
+
+  @include bp.from(lg) {
+    display: none;
+  }
+}
+
+/* В эталоне у поля outline: none — фокус с клавиатуры показываем на всей строке ссылки */
+.link:has(.input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.input {
+  flex-grow: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+
+  @include bp.from(lg) {
+    height: 44px;
+    font-size: 16px;
+  }
+}
+
+.copy {
+  height: 44px;
+  padding: 0 14px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+
+  @include bp.from(lg) {
+    height: 46px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+}
+
+.copied {
+  background: var(--soft);
+  color: var(--ink);
+}
+
+.copyCheck {
+  @include bp.from(lg) {
+    display: none;
+  }
+}
+
+/* ---------- Сервисы ---------- */
+.targets {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+
+  @include bp.from(lg) {
+    gap: 8px;
+  }
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+
+  @include bp.from(lg) {
+    font-size: 13px;
+  }
+}
+
+.circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  color: var(--poster-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

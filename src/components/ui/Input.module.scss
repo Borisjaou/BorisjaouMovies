@@ -1,0 +1,22 @@
+/* Поле ввода эталона. lg — 52 / padding 16 (вход), md — 50 / padding 14 (фильтры, админка) */
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline-color: var(--accent);
+}
+
+.lg {
+  height: 52px;
+  padding: 0 16px;
+}
+
+.md {
+  height: 50px;
+  padding: 0 14px;
+}

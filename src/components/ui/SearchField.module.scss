@@ -1,0 +1,55 @@
+.wrap {
+  position: relative;
+  flex-grow: 1;
+}
+
+.icon {
+  position: absolute;
+  left: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px 0 46px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline-color: var(--accent);
+}
+
+.lg {
+  .icon {
+    top: 16px;
+  }
+
+  .input {
+    height: 52px;
+  }
+}
+
+.md {
+  .icon {
+    top: 14px;
+  }
+
+  .input {
+    height: 48px;
+  }
+}
+
+.admin {
+  .icon {
+    top: 14px;
+  }
+
+  .input {
+    height: 48px;
+    border-radius: 14px;
+  }
+}

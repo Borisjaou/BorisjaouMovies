@@ -1,0 +1,260 @@
+@use "breakpoints" as bp;
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+
+  @include bp.from(lg) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ================= ПК: левая панель ================= */
+.panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+}
+
+.panelLogo {
+  position: relative;
+}
+
+.panelText {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  max-width: 520px;
+}
+
+.panelSub {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 460px;
+}
+
+/* ================= Постеры: мобила 150px / ПК 420px ================= */
+.posters {
+  position: relative;
+  flex-shrink: 0;
+  width: 354px;
+  max-width: 100%;
+  height: 150px;
+  align-self: center;
+
+  @include bp.from(lg) {
+    width: auto;
+    height: 420px;
+    align-self: stretch;
+  }
+}
+
+.poster {
+  position: absolute;
+  overflow: hidden;
+
+  > div {
+    position: absolute;
+    background: var(--shape);
+  }
+}
+
+.p1 {
+  left: 34px;
+  top: 22px;
+  width: 92px;
+  height: 124px;
+  border-radius: 16px;
+  background: var(--poster-0);
+  transform: rotate(-9deg);
+
+  @include bp.from(lg) {
+    left: 30px;
+    top: 70px;
+    width: 190px;
+    height: 280px;
+    border-radius: 26px;
+  }
+}
+
+.s1 {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  left: -20px;
+  top: 12px;
+
+  @include bp.from(lg) {
+    width: 160px;
+    height: 160px;
+    border-radius: 80px;
+    left: -40px;
+    top: 30px;
+  }
+}
+
+.p2 {
+  left: 142px;
+  top: 0;
+  width: 106px;
+  height: 146px;
+  border-radius: 18px;
+  background: var(--poster-1);
+
+  @include bp.from(lg) {
+    left: 210px;
+    top: 10px;
+    width: 220px;
+    height: 320px;
+    border-radius: 28px;
+  }
+}
+
+.s2 {
+  width: 70px;
+  height: 100px;
+  border-radius: 35px 35px 0 0;
+  left: 18px;
+  bottom: 0;
+
+  @include bp.from(lg) {
+    width: 130px;
+    height: 200px;
+    border-radius: 65px 65px 0 0;
+    left: 45px;
+  }
+}
+
+.p3 {
+  left: 262px;
+  top: 22px;
+  width: 92px;
+  height: 124px;
+  border-radius: 16px;
+  background: var(--poster-2);
+  transform: rotate(9deg);
+
+  @include bp.from(lg) {
+    left: 420px;
+    top: 70px;
+    width: 190px;
+    height: 280px;
+    border-radius: 26px;
+  }
+}
+
+.s3 {
+  width: 110px;
+  height: 110px;
+  border-radius: 55px;
+  right: -44px;
+  top: -30px;
+
+  @include bp.from(lg) {
+    width: 220px;
+    height: 220px;
+    border-radius: 110px;
+    right: -90px;
+    top: -60px;
+  }
+}
+
+/* ================= Правая часть / мобила ================= */
+.side {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+
+  @include bp.from(lg) {
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+  }
+}
+
+.mHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px var(--gutter) 8px;
+}
+
+.dTheme {
+  position: absolute;
+  top: 40px;
+  right: 48px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px var(--gutter) 24px;
+
+  @include bp.from(lg) {
+    width: 420px;
+    gap: 22px;
+    padding: 0;
+  }
+}
+
+.mIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.mText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.dHeading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.guest {
+  align-self: center;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  @include bp.from(lg) {
+    padding: 10px;
+  }
+}

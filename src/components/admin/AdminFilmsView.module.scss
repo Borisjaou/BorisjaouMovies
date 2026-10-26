@@ -1,0 +1,228 @@
+@use "breakpoints" as bp;
+
+/* Мобила — AdminFilms.dc.html (растягивается до 1023px), ПК — DeskAdminFilms.dc.html */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Мобильная шапка ---------- */
+.mHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px var(--gutter) 12px;
+  background: var(--bg);
+}
+
+.mTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mBack {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.mTopActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.mTabs {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ---------- Список ---------- */
+.main {
+  flex-grow: 1;
+  padding: 4px var(--gutter) 110px;
+
+  @include bp.from(lg) {
+    padding: 32px 40px 56px;
+  }
+}
+
+.column {
+  @include bp.from(lg) {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.dTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.dAdd {
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.dTools {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.dTabs {
+  /* 440 + padding 4 × 2: в эталоне content-box */
+  width: 448px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+
+  @include bp.from(lg) {
+    gap: 16px;
+    padding: 10px 12px;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 400;
+
+  @include bp.from(lg) {
+    align-self: auto;
+  }
+}
+
+.pub {
+  background: var(--pub-bg);
+  color: var(--pub-fg);
+}
+
+.draft {
+  background: var(--draft-bg);
+  color: var(--draft-fg);
+}
+
+.edit {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 22px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------- Кнопка «Добавить фильм» (мобила) ---------- */
+.fab {
+  position: fixed;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 20px;
+  z-index: 20;
+}
+
+.fabLink {
+  height: 56px;
+  border-radius: 18px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 400;
+  text-decoration: none;
+  box-shadow: var(--fab-shadow);
+}
+

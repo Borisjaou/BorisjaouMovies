@@ -1,0 +1,201 @@
+/* Favorites.dc.html — мобильная раскладка (до 1023px) */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px var(--gutter) 12px;
+  background: var(--bg);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.count {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.main {
+  flex-grow: 1;
+  padding: 4px var(--gutter) 24px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-grow: 1;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.poster {
+  position: relative;
+  width: 64px;
+  height: 92px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.posterShape {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+  right: -26px;
+  top: -14px;
+  background: var(--shape);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.star {
+  color: var(--star);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.action {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.heart {
+  color: var(--heart);
+}
+
+/* ---------- Пусто ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 96px;
+  height: 96px;
+  border-radius: 48px;
+  background: var(--soft);
+  color: var(--heart);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.emptyText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.emptyButton {
+  margin-top: 8px;
+  height: 50px;
+  padding: 0 22px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 400;
+  text-decoration: none;
+}

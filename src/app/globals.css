@@ -1,0 +1,188 @@
+/*
+ * Borisjaou — глобальные стили и дизайн-токены.
+ * Цвета 1:1 из THEMES (light / dark) в borisjaou-design-source/screens/*.dc.html.
+ * Имена переменных = ключи THEMES в kebab-case.
+ * Брейкпоинты для модулей — src/styles/_breakpoints.scss (600 / 768 / 1024 / 1280).
+ */
+
+/* ---------- Светлая тема (по умолчанию) + общие токены ---------- */
+:root {
+  /* Шрифты: --font-display (Oswald) и --font-body (PT Mono) задаёт next/font в layout.tsx */
+  /* Контейнер и боковые отступы */
+  --container-max: 1440px;
+  --gutter: 20px;
+
+  /* Одинаковые в обеих темах */
+  --overlay: rgba(13, 13, 13, 0.45);
+  --fab-shadow: 0 8px 24px rgba(13, 13, 13, 0.18);
+
+  --bg: #fcf3e4;
+  --surface: #ffffff;
+  --field: #fffdf8;
+  --soft: #f5e1be;
+  --panel: #f5e1be;
+  --ink: #0d0d0d;
+  --muted: #5e574e;
+  --line: rgba(13, 13, 13, 0.12);
+  --accent: #f37925;
+  --on-accent: #0d0d0d;
+  --link: #b4520f;
+  --nav: #fffdf8;
+
+  --shape: rgba(255, 255, 255, 0.42);
+  --tag: rgba(255, 255, 255, 0.6);
+  --glass-mobile: rgba(255, 255, 255, 0.82);
+  --glass-desktop: rgba(255, 255, 255, 0.85);
+  --glass: var(--glass-mobile);
+  --poster-ink: #0d0d0d;
+  --star: #e07a1f;
+  --heart: #d9480f;
+
+  /* Палитра постеров: posters[0..5] */
+  --poster-0: #fac670;
+  --poster-1: #91c3ce;
+  --poster-2: #c0a8e6;
+  --poster-3: #f38e44;
+  --poster-4: #f5e1be;
+  --poster-5: #eeebf2;
+
+  /* Админка */
+  --upload-bg: #eeebf2;
+  --upload-ink: #3a3440;
+  --dash: rgba(13, 13, 13, 0.25);
+  --err: #b42318;
+  --err-bg: #fbe3dc;
+  --ok-bg: #d5ecef;
+  --ok-fg: #1f5c62;
+  --badge: #c0a8e6;
+  --badge-ink: #0d0d0d;
+  --pub-bg: #d5ecef;
+  --pub-fg: #1f5c62;
+  --draft-bg: #f5e1be;
+  --draft-fg: #6b4a12;
+
+  color-scheme: light;
+}
+
+/* ---------- Тёмная тема ---------- */
+[data-theme="dark"] {
+  --bg: #1b1a19;
+  --surface: #252321;
+  --field: #1f1e1c;
+  --soft: #322e29;
+  --panel: #252321;
+  --ink: #f3ede4;
+  --muted: #aba398;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #ee9a62;
+  --on-accent: #1b1a19;
+  --link: #f2b388;
+  --nav: #201f1d;
+
+  --shape: rgba(255, 255, 255, 0.12);
+  --tag: rgba(0, 0, 0, 0.25);
+  --glass-mobile: rgba(27, 26, 25, 0.72);
+  --glass-desktop: rgba(27, 26, 25, 0.75);
+  --poster-ink: #f7efe3;
+  --star: #f0b45c;
+  --heart: #f29a6b;
+
+  --poster-0: #7d6538;
+  --poster-1: #3d6770;
+  --poster-2: #5b4d75;
+  --poster-3: #8a5430;
+  --poster-4: #5c5040;
+  --poster-5: #3f3b4a;
+
+  --upload-bg: #3f3b4a;
+  --upload-ink: #e6e0ee;
+  --dash: rgba(255, 255, 255, 0.28);
+  --err: #f4a08a;
+  --err-bg: #4a2a22;
+  --ok-bg: #2c4a4f;
+  --ok-fg: #bfe3e8;
+  --badge: #5b4d75;
+  --badge-ink: #f3ede4;
+  --pub-bg: #2c4a4f;
+  --pub-fg: #bfe3e8;
+  --draft-bg: #4a3f2c;
+  --draft-fg: #f2d9a8;
+
+  color-scheme: dark;
+}
+
+/* ---------- Адаптивные токены (md = 768, lg = 1024) ---------- */
+@media (min-width: 768px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    /* На ПК стеклянные кнопки на постерах: 0.85 / 0.75 */
+    --glass: var(--glass-desktop);
+  }
+}
+
+/* ---------- База ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+/* Скрыт визуально, доступен скринридеру (label поиска в эталоне) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Переключение раскладок: мобильная до 1023px, десктопная с 1024px (README «Адаптив») */
+@media (min-width: 1024px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .only-desktop {
+    display: none !important;
+  }
+}
