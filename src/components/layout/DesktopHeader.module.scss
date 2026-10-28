@@ -1,3 +1,5 @@
+@use "breakpoints" as bp;
+
 .header {
   position: sticky;
   top: 0;
@@ -33,7 +35,32 @@
   color: var(--ink);
   font-size: 15px;
   font-weight: 400;
+  white-space: nowrap;
   text-decoration: none;
+}
+
+/* 1024–1279: у разделов-списков вместо подписи иконка (подпись остаётся для чтения с экрана) */
+.navIcon {
+  display: none;
+}
+
+@include bp.between(lg, xl) {
+  .navItem {
+    padding: 0 12px;
+  }
+
+  .navIcon {
+    display: block;
+  }
+
+  .shelfLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 .navOn {

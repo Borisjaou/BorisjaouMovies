@@ -209,35 +209,40 @@ export function FilmView({ film, similar }: FilmViewProps) {
                 </section>
               )}
 
-              <div className={styles.dActions}>
-                {trailer(
-                  styles.dTrailer,
-                  <>
-                    <Icon name="play" size={18} />
-                    Смотреть трейлер
-                  </>,
-                )}
-                {lists.map((l) => (
-                  <button
-                    key={l.id}
-                    type="button"
-                    onClick={l.toggle}
-                    aria-pressed={l.on}
-                    aria-label={l.on ? SHELVES[l.id].removeLabel : SHELVES[l.id].addLabel}
-                    className={styles.dButton}
-                  >
-                    {listIcon(l.id, l.on, 22)}
-                    {l.on ? SHELVES[l.id].buttonOn : SHELVES[l.id].buttonOff}
+              <div className={styles.dActionRows}>
+                <div className={styles.dActions}>
+                  {trailer(
+                    styles.dTrailer,
+                    <>
+                      <Icon name="play" size={18} />
+                      Смотреть трейлер
+                    </>,
+                  )}
+                  <button type="button" onClick={toggleFav} aria-pressed={fav} className={styles.dButton}>
+                    <Icon name="heart" size={22} filled={fav} className={cx(fav && styles.heartOn)} />
+                    {fav ? "В избранном" : "В избранное"}
                   </button>
-                ))}
-                <button type="button" onClick={toggleFav} aria-pressed={fav} className={styles.dButton}>
-                  <Icon name="heart" size={22} filled={fav} className={cx(fav && styles.heartOn)} />
-                  {fav ? "В избранном" : "В избранное"}
-                </button>
-                <button type="button" onClick={openShare} className={styles.dButton}>
-                  <Icon name="share" size={20} />
-                  Поделиться
-                </button>
+                  <button type="button" onClick={openShare} className={styles.dButton}>
+                    <Icon name="share" size={20} />
+                    Поделиться
+                  </button>
+                </div>
+                {/* «Надо посмотреть» / «Просмотрено» — отдельной строкой под кнопками эталона */}
+                <div className={styles.dActions}>
+                  {lists.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={l.toggle}
+                      aria-pressed={l.on}
+                      aria-label={l.on ? SHELVES[l.id].removeLabel : SHELVES[l.id].addLabel}
+                      className={styles.dButton}
+                    >
+                      {listIcon(l.id, l.on, 22)}
+                      {l.on ? SHELVES[l.id].buttonOn : SHELVES[l.id].buttonOff}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {crew.length > 0 && (

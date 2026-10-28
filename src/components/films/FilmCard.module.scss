@@ -170,6 +170,34 @@
   color: var(--accent);
 }
 
+/* ПК 1024–1279: в узкой карточке 4 кнопки (поделиться + 3 списка) — компактнее */
+@include bp.between(lg, xl) {
+  .actions {
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+  }
+
+  .glass {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+  }
+}
+
+/* ПК от 1280: 4 кнопки по 40 */
+@include bp.from(xl) {
+  .actions {
+    gap: 6px;
+  }
+
+  .glass {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+  }
+}
+
 .share {
   @include bp.below(lg) {
     display: none;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AccountActions } from "@/components/account/AccountActions";
+import { Icon } from "@/components/icons";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { cx } from "@/lib/cx";
@@ -47,7 +48,8 @@ export function DesktopHeader({ active, catalogHref, shelfQuery = EMPTY_QUERY, s
               aria-current={item.id === active ? "page" : undefined}
               className={cx(styles.navItem, item.id === active && styles.navOn)}
             >
-              {item.label}
+              {item.shelf && <Icon name={SHELVES[item.shelf].icon} size={20} className={styles.navIcon} />}
+              <span className={cx(item.shelf && styles.shelfLabel)}>{item.label}</span>
               {item.shelf && shelves[item.shelf].ready && (
                 <span className={styles.badge}>{shelves[item.shelf].count}</span>
               )}

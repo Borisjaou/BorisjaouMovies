@@ -408,6 +408,12 @@
   color: var(--muted);
 }
 
+.dActionRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .dActions {
   display: flex;
   flex-wrap: wrap;

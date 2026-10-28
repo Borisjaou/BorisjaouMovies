@@ -17,7 +17,8 @@
   align-items: center;
   gap: 4px;
   padding: 4px 0;
-  font-size: 10px;
+  /* 10px на 390; на 360 мельче, чтобы подписи не слипались */
+  font-size: min(10px, 2.6vw);
   letter-spacing: -0.02em;
   white-space: nowrap;
   font-weight: 400;
