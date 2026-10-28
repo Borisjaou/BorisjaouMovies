@@ -1,5 +1,9 @@
+import { randomUUID } from "node:crypto";
+import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { expect, type Page, type TestInfo } from "@playwright/test";
+import bcrypt from "bcryptjs";
+import Database from "better-sqlite3";
 
 /** Администратор e2e: его почта передаётся серверу в ADMIN_EMAILS (playwright.config.ts) */
 export const E2E_ADMIN_EMAIL = "admin@e2e.test";
@@ -11,9 +15,37 @@ export function uniqueEmail(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@e2e.test`;
 }
 
+/** База e2e (playwright.config.ts → DATABASE_URL) */
+const E2E_DB = resolve("data/e2e.db");
+
+/**
+ * Обычный пользователь — сразу в базе: регистрация на сайте закрыта (только для ADMIN_EMAILS).
+ */
+export function createUser(email: string, password = "password123", name = "Тестовый зритель"): void {
+  const db = new Database(E2E_DB);
+  try {
+    db.prepare('INSERT INTO "User" ("id", "email", "name", "passwordHash", "role") VALUES (?, ?, ?, ?, ?)').run(
+      `e2e-${randomUUID()}`,
+      email.toLowerCase(),
+      name,
+      bcrypt.hashSync(password, 4),
+      "user",
+    );
+  } finally {
+    db.close();
+  }
+}
+
+/** Создать обычного пользователя и войти (вместо закрытой регистрации) */
 export async function register(page: Page, email: string, password = "password123", callbackUrl = "/") {
-  await page.goto(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
-  await page.getByRole("tab", { name: "Регистрация" }).click();
+  createUser(email, password);
+  await login(page, email, password, callbackUrl);
+  await expect(page).not.toHaveURL(/\/login/);
+}
+
+/** Форма регистрации по прямой ссылке — работает только для почты из ADMIN_EMAILS */
+export async function registerViaForm(page: Page, email: string, password = "password123", callbackUrl = "/") {
+  await page.goto(`/login?mode=register&callbackUrl=${encodeURIComponent(callbackUrl)}`);
   await page.getByLabel("Имя").fill("Тестовый зритель");
   await page.getByLabel("Эл. почта").fill(email);
   await page.getByLabel("Пароль", { exact: true }).fill(password);

@@ -117,21 +117,6 @@
   }
 }
 
-.star {
-  /* Без flex-shrink: 0 — в узкой карточке звезда сжимается, как в эталоне */
-  color: var(--star);
-
-  @include bp.from(lg) {
-    width: 15px;
-    height: 15px;
-  }
-}
-
-.rating {
-  font-weight: 400;
-  color: var(--ink);
-}
-
 .desc {
   margin: 0;
   font-size: 13px;
@@ -178,6 +163,11 @@
 
 .favOn {
   color: var(--heart);
+}
+
+/* «Надо посмотреть» / «Просмотрено» включены */
+.listOn {
+  color: var(--accent);
 }
 
 .share {

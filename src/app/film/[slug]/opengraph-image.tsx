@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 import { LIGHT } from "@/lib/palette";
-import { formatRating } from "@/lib/films/format";
 import { loadFilm } from "./data";
 
 export const alt = "Постер фильма — Borisjaou";
@@ -72,24 +71,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             <div style={{ display: "flex", padding: "10px 18px", borderRadius: 16, background: LIGHT.tag, fontSize: 28 }}>
               {`${film.year} · ${film.genres[0]}`}
             </div>
-            {film.rating !== null && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "10px 18px",
-                  borderRadius: 16,
-                  background: LIGHT.tag,
-                  fontSize: 28,
-                }}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill={LIGHT.star}>
-                  <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
-                </svg>
-                {formatRating(film.rating)}
-              </div>
-            )}
           </div>
           <div style={{ display: "flex", fontFamily: "Oswald", fontSize: titleSize, lineHeight: 1, maxWidth: 1000 }}>
             {film.title}

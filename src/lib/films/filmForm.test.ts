@@ -35,7 +35,6 @@ describe("checkFilmForm", () => {
       year: 2024,
       durationMin: null,
       genres: ["Фантастика", "Драма"],
-      ageRating: "16+",
       country: null,
       director: null,
       cast: [],
@@ -82,7 +81,6 @@ describe("filmFormValuesFromFormData", () => {
     fd.set("year", "2025");
     fd.append("genres", "Драма");
     fd.append("genres", "Вестерн");
-    fd.set("ageRating", "99+");
     fd.set("isNew", "0");
     const v = filmFormValuesFromFormData(fd);
     expect(v.genres).toEqual(["Драма"]);
@@ -90,7 +88,6 @@ describe("filmFormValuesFromFormData", () => {
     const ordered = new FormData();
     for (const g of ["Фантастика", "Драма", "Фантастика"]) ordered.append("genres", g);
     expect(filmFormValuesFromFormData(ordered).genres).toEqual(["Фантастика", "Драма"]);
-    expect(v.ageRating).toBe("");
     expect(v.isNew).toBe(false);
     expect(v.director).toBe("");
   });

@@ -6,18 +6,14 @@ import { Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/Chip";
 import { Segmented } from "@/components/ui/Segmented";
 import {
-  AGE_RATINGS,
   COUNTRIES,
   DECADES,
   DURATION_OPTIONS,
   FILTER_GENRES,
-  RATING_OPTIONS,
-  type AgeRating,
   type Country,
   type DecadeId,
   type DurationOptionId,
   type Genre,
-  type RatingOptionId,
 } from "@/lib/films/constants";
 import { catalogHref, type CatalogQuery } from "@/lib/films/params";
 import { useDesktopRedirect } from "@/lib/hooks/useDesktopRedirect";
@@ -27,10 +23,7 @@ import styles from "./FiltersView.module.scss";
 interface Draft {
   decades: DecadeId[];
   genres: Genre[];
-  /** null — ничего не выбрано (повторный клик по активному), "any" — «Любой» */
-  rating: RatingOptionId | null;
   duration: DurationOptionId | null;
-  ages: AgeRating[];
   from: string;
   to: string;
   country: Country | "";
@@ -39,9 +32,7 @@ interface Draft {
 const EMPTY_DRAFT: Draft = {
   decades: [],
   genres: [],
-  rating: "any",
   duration: null,
-  ages: [],
   from: "",
   to: "",
   country: "",
@@ -51,9 +42,7 @@ function fromQuery(q: CatalogQuery): Draft {
   return {
     decades: q.decades,
     genres: q.genres,
-    rating: q.rating ?? "any",
     duration: q.duration ?? null,
-    ages: q.ages,
     from: q.yearFrom !== undefined ? String(q.yearFrom) : "",
     to: q.yearTo !== undefined ? String(q.yearTo) : "",
     country: q.country ?? "",
@@ -83,17 +72,13 @@ export function FiltersView({ query }: { query: CatalogQuery }) {
   const count =
     draft.decades.length +
     draft.genres.length +
-    draft.ages.length +
-    (draft.rating !== null && draft.rating !== "any" ? 1 : 0) +
     (draft.duration !== null ? 1 : 0);
 
   const applyHref = catalogHref({
     ...query,
     decades: draft.decades,
     genres: draft.genres,
-    rating: draft.rating === null || draft.rating === "any" ? undefined : draft.rating,
     duration: draft.duration ?? undefined,
-    ages: draft.ages,
     yearFrom: year(draft.from),
     yearTo: year(draft.to),
     country: draft.country || undefined,
@@ -176,18 +161,6 @@ export function FiltersView({ query }: { query: CatalogQuery }) {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.h2}>Рейтинг зрителей</h2>
-          <Segmented
-            options={RATING_OPTIONS}
-            value={draft.rating}
-            onChange={(id) => set({ rating: draft.rating === id ? null : id })}
-            ariaLabel="Минимальный рейтинг"
-            itemHeight={42}
-            fontSize={14}
-          />
-        </section>
-
-        <section className={styles.section}>
           <h2 className={styles.h2}>Длительность</h2>
           <Segmented
             options={DURATION_OPTIONS}
@@ -197,21 +170,6 @@ export function FiltersView({ query }: { query: CatalogQuery }) {
             itemHeight={42}
             fontSize={14}
           />
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.h2}>Возрастной рейтинг</h2>
-          <div className={styles.chips}>
-            {AGE_RATINGS.map((a) => (
-              <Chip
-                key={a}
-                size="age"
-                label={a}
-                on={draft.ages.includes(a)}
-                onClick={() => set({ ages: toggle(draft.ages, a) })}
-              />
-            ))}
-          </div>
         </section>
 
         <section className={styles.section}>

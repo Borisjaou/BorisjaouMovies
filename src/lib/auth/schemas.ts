@@ -11,6 +11,7 @@ export const AUTH_MESSAGES = {
   passwordLong: "Не больше 72 символов",
   emailTaken: "Этот адрес уже зарегистрирован",
   wrongCredentials: "Неверная эл. почта или пароль",
+  registrationClosed: "Регистрация закрыта",
   googleNotConfigured: "Вход через Google пока не настроен",
   unknown: "Не получилось войти. Попробуйте ещё раз",
 } as const;

@@ -15,11 +15,13 @@ import { SearchField } from "@/components/ui/SearchField";
 import { Segmented } from "@/components/ui/Segmented";
 import { Toast } from "@/components/ui/Toast";
 import { cx } from "@/lib/cx";
-import { useFavoriteFilms, useFavorites } from "@/lib/favorites";
+import { useListFilms } from "@/lib/favorites";
 import { CATALOG_GENRES, FILM_LINK_BASE, SORT_OPTIONS, type Genre } from "@/lib/films/constants";
-import { catalogHref, stringifyCatalogQuery, type CatalogQuery } from "@/lib/films/params";
+import { catalogHref, shelfOf, stringifyCatalogQuery, withShelf, type CatalogQuery } from "@/lib/films/params";
 import type { Film, FilmPage } from "@/lib/films/types";
 import { FILM_FORMS, plural } from "@/lib/plural";
+import { SHELVES, shelfToast, type ShelfId } from "@/lib/shelves";
+import { useShelves } from "@/lib/useShelf";
 import { useToast } from "@/lib/useToast";
 import { FilterPanel } from "./FilterPanel";
 import { useLoadMore } from "./useLoadMore";
@@ -29,7 +31,7 @@ const SEARCH_DELAY_MS = 300;
 const PLACEHOLDER = "Фильм, актёр, режиссёр";
 
 interface CatalogViewProps {
-  /** Первая страница каталога: отфильтрована и отсортирована на сервере (в режиме «Избранное» не используется) */
+  /** Первая страница каталога: отфильтрована и отсортирована на сервере (в режиме раздела-списка не используется) */
   page: FilmPage;
   freshFilms: Film[];
   query: CatalogQuery;
@@ -39,7 +41,9 @@ interface CatalogViewProps {
 export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const favorites = useFavorites();
+  const shelves = useShelves();
+  // Раздел на ПК: «Надо посмотреть» / «Просмотрено» / «Избранное»; null — обычный каталог
+  const shelf = shelfOf(query);
   const toast = useToast();
 
   // ---- URL ----
@@ -81,20 +85,21 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
 
   // ---- Список ----
   // Каталог: первая страница с сервера + подгрузка следующих при прокрутке (по 20)
-  const listKey = stringifyCatalogQuery({ ...query, fav: false });
-  const { items: catalogItems, total: catalogTotal, hasMore, attachSentinel } = useLoadMore(page, listKey, !query.fav);
-  // «Избранное» (ПК): фильмы из избранного с теми же фильтрами и сортировкой
-  const favoriteList = useFavoriteFilms(listKey, query.fav);
+  const listKey = stringifyCatalogQuery(withShelf(query, null));
+  const { items: catalogItems, total: catalogTotal, hasMore, attachSentinel } = useLoadMore(page, listKey, shelf === null);
+  // Раздел-список (ПК): фильмы из списка с теми же фильтрами и сортировкой
+  const shelfApi = shelves[shelf ?? "favorites"];
+  const shelfList = useListFilms(shelfApi, listKey, shelf !== null);
 
-  const list = query.fav ? (favoriteList ?? []) : catalogItems;
-  // Пока избранное не загружено, в режиме «Избранное» не показываем ни список, ни «пусто»
-  const pending = query.fav && favoriteList === null;
-  const total = query.fav ? list.length : catalogTotal;
+  const list = shelf ? (shelfList ?? []) : catalogItems;
+  // Пока список не загружен, в режиме раздела не показываем ни фильмы, ни «пусто»
+  const pending = shelf !== null && shelfList === null;
+  const total = shelf ? list.length : catalogTotal;
   const countLabel = `${total} ${plural(total, FILM_FORMS)}`;
 
-  const toggleFavorite = (film: Film) => {
-    const added = favorites.toggle(film.id);
-    toast.show(added ? `«${film.title}» добавлен в избранное` : `«${film.title}» убран из избранного`);
+  const toggleShelf = (film: Film, id: ShelfId) => {
+    const added = shelves[id].toggle(film.id);
+    toast.show(shelfToast(id, film.title, added));
   };
   const share = (film: Film) => {
     navigator.clipboard?.writeText(`https://${FILM_LINK_BASE}${film.slug}`).catch(() => undefined);
@@ -108,7 +113,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
   const sortIndex = SORT_OPTIONS.findIndex((s) => s.id === query.sort);
   const cycleSort = () => update({ sort: SORT_OPTIONS[(sortIndex + 1) % SORT_OPTIONS.length].id });
 
-  const emptyFavorites = query.fav && favorites.count === 0;
+  const emptyShelf = shelf !== null && shelfApi.count === 0;
   const filtersHref = `/filters${stringifyCatalogQuery(query) ? `?${stringifyCatalogQuery(query)}` : ""}`;
 
   const searchField = (id: string, size: "lg" | "md") => (
@@ -147,9 +152,9 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
 
       {/* ---------- ПК: шапка (DeskCatalog) ---------- */}
       <DesktopHeader
-        active={query.fav ? "favorites" : "catalog"}
-        catalogHref={catalogHref({ ...query, fav: false })}
-        favoritesHref={catalogHref({ ...query, fav: true })}
+        active={shelf ?? "catalog"}
+        catalogHref={catalogHref(withShelf(query, null))}
+        shelfQuery={withShelf(query, null)}
         search={searchField("d-search", "md")}
         isAdmin={isAdmin}
       />
@@ -159,7 +164,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
 
         <main className={styles.main}>
           {/* Заголовок страницы для чтения с экрана: в эталоне видимого h1 у каталога нет */}
-          <h1 className="visually-hidden">{query.fav ? "Избранное" : "Каталог фильмов"}</h1>
+          <h1 className="visually-hidden">{shelf ? SHELVES[shelf].title : "Каталог фильмов"}</h1>
           {/* Мобила: жанры одной строкой */}
           <div role="group" aria-label="Жанры" className={cx(styles.mChips, "only-mobile")}>
             <Chip label="Все" on={query.genres.length === 0} onClick={() => update({ genres: [] })} />
@@ -168,8 +173,8 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
             ))}
           </div>
 
-          {/* Новинки: на ПК скрыты в режиме «Избранное» */}
-          <section className={cx(styles.fresh, query.fav && "only-mobile")}>
+          {/* Новинки: на ПК скрыты в режиме раздела-списка */}
+          <section className={cx(styles.fresh, shelf && "only-mobile")}>
             <div className={styles.freshHead}>
               <h2 className={styles.freshTitle}>Новинки</h2>
               <a href="#" className={cx(styles.freshAll, "only-mobile")}>
@@ -200,7 +205,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
             {/* ПК: заголовок + счётчик + сортировка, чипы жанров */}
             <div className={cx(styles.dCatalogHead, "only-desktop")}>
               <div className={styles.dHeading}>
-                <h2 className={styles.dCatalogTitle}>{query.fav ? "Избранное" : "Каталог"}</h2>
+                <h2 className={styles.dCatalogTitle}>{shelf ? SHELVES[shelf].title : "Каталог"}</h2>
                 <span className={styles.dCount}>{pending ? "" : countLabel}</span>
               </div>
               <Segmented
@@ -227,13 +232,17 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
                   <FilmCard
                     key={film.id}
                     film={film}
-                    isFavorite={favorites.has(film.id)}
-                    onToggleFavorite={toggleFavorite}
+                    shelves={{
+                      watchlist: shelves.watchlist.has(film.id),
+                      watched: shelves.watched.has(film.id),
+                      favorites: shelves.favorites.has(film.id),
+                    }}
+                    onToggle={toggleShelf}
                     onShare={share}
                   />
                 ))}
                 {/* Невидимая метка: когда доходит до экрана, подгружается следующая страница */}
-                {!query.fav && hasMore && <div ref={attachSentinel} aria-hidden="true" />}
+                {!shelf && hasMore && <div ref={attachSentinel} aria-hidden="true" />}
               </div>
             ) : (
               <>
@@ -249,16 +258,14 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
                   </button>
                 </div>
                 <div className={cx(styles.dEmpty, "only-desktop")}>
-                  <div className={styles.dEmptyTitle}>{emptyFavorites ? "В избранном пока пусто" : "Ничего не нашлось"}</div>
+                  <div className={styles.dEmptyTitle}>{emptyShelf && shelf ? SHELVES[shelf].deskEmptyTitle : "Ничего не нашлось"}</div>
                   <div className={styles.dEmptyText}>
-                    {emptyFavorites
-                      ? "Нажмите на сердечко у фильма, чтобы сохранить его"
-                      : "Попробуйте изменить запрос или фильтры"}
+                    {emptyShelf && shelf ? SHELVES[shelf].deskEmptyText : "Попробуйте изменить запрос или фильтры"}
                   </div>
                   <button
                     type="button"
                     onClick={() =>
-                      resetTo({ q: "", genres: [], decades: [], ages: [], sort: query.sort, fav: false })
+                      resetTo({ q: "", genres: [], decades: [], sort: query.sort, fav: false })
                     }
                     className={styles.dEmptyButton}
                   >

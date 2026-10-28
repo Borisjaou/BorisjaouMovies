@@ -22,6 +22,7 @@ model User {
   googleLinked Boolean    @default(false)
   createdAt    DateTime   @default(now())
   favorites    Favorite[]
+  watchItems   WatchItem[]
 }
 
 model Film {
@@ -30,9 +31,10 @@ model Film {
   title            String
   originalTitle    String?
   year             Int
+  /// Не используется: рейтинг убран с сайта (столбец оставлен, чтобы не терять данные)
   rating           Float?
   durationMin      Int?
-  /// "0+" | "6+" | "12+" | "16+" | "18+"
+  /// Не используется: возрастной рейтинг убран с сайта (столбец оставлен, чтобы не терять данные)
   ageRating        String?
   country          String?
   director         String?
@@ -56,6 +58,7 @@ model Film {
   updatedAt        DateTime    @updatedAt
   genres           FilmGenre[]
   favorites        Favorite[]
+  watchItems       WatchItem[]
 
   @@index([status, popularity])
   @@index([status, rating])
@@ -82,4 +85,20 @@ model Favorite {
 
   @@id([userId, filmId])
   @@index([filmId])
+}
+
+/// Списки «Надо посмотреть» и «Просмотрено». Одна запись на пару пользователь–фильм:
+/// фильм не может быть в обоих списках сразу.
+model WatchItem {
+  userId    String
+  filmId    Int
+  /// "watchlist" | "watched"
+  list      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  film      Film     @relation(fields: [filmId], references: [id], onDelete: Cascade)
+
+  @@id([userId, filmId])
+  @@index([filmId])
+  @@index([userId, list])
 }

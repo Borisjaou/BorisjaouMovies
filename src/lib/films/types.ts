@@ -1,4 +1,4 @@
-import type { AgeRating, DecadeId, DurationOptionId, Genre, RatingOptionId, SortId } from "./constants";
+import type { DecadeId, DurationOptionId, Genre, SortId } from "./constants";
 
 export type FilmStatus = "published" | "draft";
 
@@ -16,10 +16,7 @@ export interface Film {
   year: number;
   /** Первый жанр показывается в карточке («2024 · Фантастика») */
   genres: Genre[];
-  /** null — у черновика рейтинга ещё нет */
-  rating: number | null;
   durationMin: number | null;
-  ageRating: AgeRating | null;
   country: string | null;
   director: string | null;
   cast: string[];
@@ -49,10 +46,7 @@ export interface FilmFilters {
   /** Годы выпуска «С» / «По» (Filters.dc.html), включительно */
   yearFrom?: number;
   yearTo?: number;
-  rating?: RatingOptionId;
   duration?: DurationOptionId;
-  /** Любой из выбранных возрастных рейтингов */
-  ages?: readonly AgeRating[];
   /** Страна; undefined — «Все страны» */
   country?: string;
   sort?: SortId;

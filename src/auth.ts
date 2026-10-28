@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { authConfig } from "@/auth.config";
-import { roleForEmail } from "@/lib/auth/roles";
+import { isAdminEmail, roleForEmail } from "@/lib/auth/roles";
 import { loginSchema } from "@/lib/auth/schemas";
 import { getUserRepository } from "@/lib/users";
 
@@ -27,9 +27,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
+    // Регистрация закрыта: Google создаёт аккаунт только для почты из ADMIN_EMAILS
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true;
+      const email = profile?.email?.toLowerCase();
+      if (!email) return false;
+      if (isAdminEmail(email)) return true;
+      return Boolean(await getUserRepository().findByEmail(email));
+    },
     async jwt({ token, user, account, profile }) {
       if (account?.provider === "google" && profile?.email) {
-        // Первый вход через Google создаёт пользователя; повторный — привязывает Google к аккаунту
+        // Первый вход через Google создаёт пользователя (только админ — см. signIn); повторный — привязывает Google к аккаунту
         const repo = getUserRepository();
         const email = profile.email.toLowerCase();
         const existing = await repo.findByEmail(email);

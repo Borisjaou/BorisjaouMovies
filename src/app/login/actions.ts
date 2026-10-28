@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { isGoogleConfigured, signIn } from "@/auth";
-import { roleForEmail, safeCallbackUrl } from "@/lib/auth/roles";
+import { isAdminEmail, roleForEmail, safeCallbackUrl } from "@/lib/auth/roles";
 import { AUTH_MESSAGES, loginSchema, registerSchema, type LoginInput, type RegisterInput } from "@/lib/auth/schemas";
 import { getUserRepository } from "@/lib/users";
 
@@ -48,6 +48,9 @@ export async function registerAction(input: RegisterInput, callbackUrl?: string)
   if (!parsed.success) return { ok: false, fieldErrors: fieldErrors(parsed.error.issues) };
 
   const { name, email, password } = parsed.data;
+  // Регистрация закрыта: создать аккаунт можно только с почтой из ADMIN_EMAILS
+  if (!isAdminEmail(email)) return { ok: false, formError: AUTH_MESSAGES.registrationClosed };
+
   const repo = getUserRepository();
   const existing = await repo.findByEmail(email);
   if (existing) return { ok: false, fieldErrors: { email: AUTH_MESSAGES.emailTaken } };

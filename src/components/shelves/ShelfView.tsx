@@ -8,30 +8,38 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { Segmented } from "@/components/ui/Segmented";
 import { Toast } from "@/components/ui/Toast";
-import { FAVORITE_SORTS, favoriteFilms, useFavoriteFilms, useFavorites, type FavoriteSortId } from "@/lib/favorites";
-import { formatRating } from "@/lib/films/format";
+import { FAVORITE_SORTS, favoriteFilms, useListFilms, type FavoriteSortId } from "@/lib/favorites";
 import type { Film } from "@/lib/films/types";
 import { useDesktopRedirect } from "@/lib/hooks/useDesktopRedirect";
 import { filmPath, filmUrl } from "@/lib/site";
+import { catalogHref, EMPTY_QUERY, withShelf } from "@/lib/films/params";
+import { SHELVES, shelfToast, type ShelfId } from "@/lib/shelves";
+import { useShelf } from "@/lib/useShelf";
 import { useToast } from "@/lib/useToast";
-import styles from "./FavoritesView.module.scss";
+import styles from "./ShelfView.module.scss";
 import { PosterImage } from "@/components/films/PosterImage";
 
-/** /favorites → режим «Избранное» в каталоге на ПК */
-function toCatalogFavorites(): string {
-  return "/?fav=1";
-}
+/** /favorites, /watchlist, /watched → тот же раздел в каталоге на ПК */
+const DESKTOP_HREF: Record<ShelfId, () => string> = {
+  favorites: () => catalogHref(withShelf(EMPTY_QUERY, "favorites")),
+  watchlist: () => catalogHref(withShelf(EMPTY_QUERY, "watchlist")),
+  watched: () => catalogHref(withShelf(EMPTY_QUERY, "watched")),
+};
 
-/** Избранное: Favorites.dc.html (только мобильная раскладка, до 1023px) */
-export function FavoritesView() {
-  useDesktopRedirect(toCatalogFavorites);
-  const favorites = useFavorites();
+/**
+ * Раздел-список: Избранное (Favorites.dc.html) и по его образцу «Надо посмотреть» / «Просмотрено».
+ * Только мобильная раскладка, до 1023px.
+ */
+export function ShelfView({ shelf }: { shelf: ShelfId }) {
+  useDesktopRedirect(DESKTOP_HREF[shelf]);
+  const info = SHELVES[shelf];
+  const list = useShelf(shelf);
   const toast = useToast();
   const [sort, setSort] = useState<FavoriteSortId>("recent");
 
-  const films = useFavoriteFilms("");
+  const films = useListFilms(list, "");
   const loaded = films !== null;
-  const items = favoriteFilms(films ?? [], favorites.entries, sort);
+  const items = favoriteFilms(films ?? [], list.entries, sort);
   const hasItems = items.length > 0;
   const empty = loaded && !hasItems;
 
@@ -47,8 +55,8 @@ export function FavoritesView() {
   };
 
   const remove = (film: Film) => {
-    favorites.remove(film.id);
-    toast.show(`«${film.title}» убран из избранного`);
+    list.remove(film.id);
+    toast.show(shelfToast(shelf, film.title, false));
   };
 
   return (
@@ -56,7 +64,7 @@ export function FavoritesView() {
       <header className={styles.header}>
         <div className={styles.top}>
           <div className={styles.heading}>
-            <h1 className={styles.title}>Избранное</h1>
+            <h1 className={styles.title}>{info.title}</h1>
             {loaded && <span className={styles.count}>{items.length}</span>}
           </div>
           <ThemeToggle />
@@ -88,12 +96,6 @@ export function FavoritesView() {
                     <div className={styles.meta}>
                       {film.year} · {film.genres[0]}
                     </div>
-                    {film.rating !== null && (
-                      <div className={styles.rating}>
-                        <Icon name="star" size={14} className={styles.star} />
-                        {formatRating(film.rating)}
-                      </div>
-                    )}
                   </div>
                 </Link>
                 <div className={styles.actions}>
@@ -108,10 +110,10 @@ export function FavoritesView() {
                   <button
                     type="button"
                     onClick={() => remove(film)}
-                    aria-label={`Убрать из избранного: ${film.title}`}
-                    className={`${styles.action} ${styles.heart}`}
+                    aria-label={`${info.removeLabel}: ${film.title}`}
+                    className={`${styles.action} ${shelf === "favorites" ? styles.heart : styles.listOn}`}
                   >
-                    <Icon name="heart" size={22} filled />
+                    <Icon name={info.icon} size={22} filled={shelf !== "watched"} />
                   </button>
                 </div>
               </li>
@@ -122,10 +124,10 @@ export function FavoritesView() {
         {empty && (
           <div className={styles.empty}>
             <div aria-hidden="true" className={styles.emptyIcon}>
-              <Icon name="heart" size={40} strokeWidth={1.6} />
+              <Icon name={info.icon} size={40} strokeWidth={1.6} />
             </div>
-            <div className={styles.emptyTitle}>Здесь пока пусто</div>
-            <div className={styles.emptyText}>Нажмите на сердечко у фильма, чтобы сохранить его сюда</div>
+            <div className={styles.emptyTitle}>{info.emptyTitle}</div>
+            <div className={styles.emptyText}>{info.emptyText}</div>
             <Link href="/" className={styles.emptyButton}>
               Перейти в каталог
             </Link>
@@ -134,7 +136,7 @@ export function FavoritesView() {
       </main>
 
       <Toast message={toast.message} placement="mobile" />
-      <BottomNav active="favorites" />
+      <BottomNav active={shelf} />
     </div>
   );
 }

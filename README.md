@@ -31,7 +31,9 @@ npm run build      # продакшен-сборка
   `not-found.tsx` — 404. Шрифты для OG — `assets/fonts` (OFL).
 - `src/components/film` — FilmView, ShareDialog (шторка на мобиле, окно на ПК).
 - `.env.example` — `NEXT_PUBLIC_SITE_URL` для ссылок «Поделиться», canonical и OG.
-- `src/app/login` — вход и регистрация (Main / DeskAuth), серверные действия в `actions.ts`.
+- `src/app/login` — вход (Main / DeskAuth), серверные действия в `actions.ts`. Регистрация закрыта: форма открывается только по прямой ссылке `/login?mode=register` и создаёт аккаунт лишь для почты из `ADMIN_EMAILS`; через Google новый аккаунт тоже только для неё.
+- `src/lib/watchlists` — «Надо посмотреть» / «Просмотрено» (как избранное: гость — localStorage, вошедший — таблица `WatchItem`; фильм только в одном из списков). Мобила: `/watchlist`, `/watched`; ПК: каталог `?list=watchlist|watched`.
+- `src/lib/films/import` — автозаполнение формы фильма по ссылке Кинопоиска / TMDB / IMDb.
 - `src/auth.ts`, `src/auth.config.ts` — Auth.js v5: email + пароль (bcryptjs), Google; роли `user` | `admin`.
 - `src/proxy.ts` — бывший middleware (Next 16): закрывает `/admin/*`.
 - `src/lib/users` — пользователи в базе (`UserRepository` на Prisma).
@@ -113,7 +115,7 @@ DATABASE_URL=postgresql://… npm run db:seed    # один раз: фильмы
 - `npm run test:e2e` — Playwright, проекты `mobile` (390×844) и `desktop` (1440×900). Первый раз: `npx playwright install chromium`.
   Сервер поднимается сам: чистая база `data/e2e.db` → `npm run build` → `next start -p 3210`, администратор `admin@e2e.test`.
   Уже запущенный сервер на 3210 переиспользуется (кроме `CI=1`).
-- Сценарии (`e2e/`): поиск, фильтры (мобила и панель ПК), редирект `/filters` на ПК, избранное (гость, перенос в аккаунт), «Поделиться» (копирование, соцсети, Escape, фокус), вход/регистрация, шапка вошедшего и выход, доступ к админке, добавление фильма с постером, черновики, robots/sitemap/метаданные.
+- Сценарии (`e2e/`): поиск, фильтры (мобила и панель ПК), редирект `/filters` на ПК, избранное (гость, перенос в аккаунт), «Поделиться» (копирование, соцсети, Escape, фокус), вход и закрытая регистрация, «Надо посмотреть» / «Просмотрено», шапка вошедшего и выход, доступ к админке, добавление фильма с постером, черновики, robots/sitemap/метаданные.
 
 ## SEO
 
@@ -162,7 +164,9 @@ DATABASE_URL=postgresql://… npm run db:seed    # один раз: фильмы
    | `SUPABASE_SERVICE_ROLE_KEY` | ключ `service_role` (секрет) |
    | `SUPABASE_STORAGE_BUCKET` | `posters` |
    | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | по желанию; redirect URI: `https://<домен>/api/auth/callback/google` |
+   | `KINOPOISK_API_KEY` | автозаполнение по ссылке Кинопоиска: ключ с kinopoiskapiunofficial.tech |
+   | `TMDB_API_KEY` | автозаполнение по ссылке TMDB / IMDb: ключ API или токен доступа на чтение с themoviedb.org |
 
-6. После первого деплоя: зарегистрироваться на `/login` с почтой из `ADMIN_EMAILS` — роль admin выдастся сама.
+6. После первого деплоя: зарегистрироваться на `/login?mode=register` с почтой из `ADMIN_EMAILS` — роль admin выдастся сама. Другим почтам регистрация закрыта.
 
 Почему не `local` на Vercel: файловая система функций только для чтения и не сохраняется между запусками.

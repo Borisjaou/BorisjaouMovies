@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import {
   loginAction,
@@ -18,7 +18,8 @@ import { cx } from "@/lib/cx";
 import { loginSchema, registerSchema } from "@/lib/auth/schemas";
 import styles from "./AuthForm.module.scss";
 
-type Mode = "login" | "register";
+export type AuthMode = "login" | "register";
+type Mode = AuthMode;
 
 interface Values {
   name: string;
@@ -28,31 +29,30 @@ interface Values {
 
 const FIELDS = ["name", "email", "password"] as const;
 
-const TABS: ReadonlyArray<{ id: Mode; label: string }> = [
-  { id: "login", label: "Вход" },
-  { id: "register", label: "Регистрация" },
-];
-
 interface AuthFormProps {
   callbackUrl: string;
+  /**
+   * Регистрация закрыта: вкладки нет, форма создания аккаунта открывается
+   * только по прямой ссылке /login?mode=register и пускает лишь почты из ADMIN_EMAILS
+   */
+  mode: Mode;
+  /** Ошибка, пришедшая в адресе (например, отказ во входе через Google) */
+  initialError?: string | null;
   /** Класс заголовка над вкладками — он виден только на ПК (DeskAuth) */
   headingClassName?: string;
 }
 
-/** Вход / регистрация: вкладки, поля, соцсети (Main / DeskAuth) */
-export function AuthForm({ callbackUrl, headingClassName }: AuthFormProps) {
+/** Вход (регистрация — только для админа по прямой ссылке): поля, соцсети (Main / DeskAuth) */
+export function AuthForm({ callbackUrl, mode, initialError = null, headingClassName }: AuthFormProps) {
   const router = useRouter();
   const { update: refreshSession } = useSession();
-  const [mode, setMode] = useState<Mode>("login");
   const [showPass, setShowPass] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(initialError);
   const [pending, startTransition] = useTransition();
-  const modeRef = useRef<Mode>(mode);
 
-  // Схема зависит от вкладки: регистрация проверяет ещё имя и длину пароля
+  // Регистрация проверяет ещё имя и длину пароля
   const resolver: Resolver<Values> = async (values) => {
-    const schema =
-      modeRef.current === "register" ? registerSchema : loginSchema;
+    const schema = mode === "register" ? registerSchema : loginSchema;
     const result = schema.safeParse(values);
     if (result.success) return { values, errors: {} };
     const errors: FieldErrors<Values> = {};
@@ -68,19 +68,11 @@ export function AuthForm({ callbackUrl, headingClassName }: AuthFormProps) {
     register,
     handleSubmit,
     setError,
-    clearErrors,
     formState: { errors },
   } = useForm<Values>({
     resolver,
     defaultValues: { name: "", email: "", password: "" },
   });
-
-  const switchMode = (next: Mode) => {
-    modeRef.current = next;
-    setMode(next);
-    setFormError(null);
-    clearErrors();
-  };
 
   const applyResult = async (result: AuthResult) => {
     if (result.ok) {
@@ -126,132 +118,90 @@ export function AuthForm({ callbackUrl, headingClassName }: AuthFormProps) {
         {mode === "register" ? "Создайте аккаунт" : "С возвращением"}
       </h1>
 
-      <div
-        role="tablist"
-        aria-label="Вход или регистрация"
-        className={styles.tabs}
-        onKeyDown={(e) => {
-          // Стрелки переключают вкладки, как в шаблоне tablist
-          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key))
-            return;
-          e.preventDefault();
-          const next: Mode =
-            e.key === "Home"
-              ? "login"
-              : e.key === "End"
-                ? "register"
-                : mode === "login"
-                  ? "register"
-                  : "login";
-          switchMode(next);
-          e.currentTarget
-            .querySelector<HTMLButtonElement>(`#auth-tab-${next}`)
-            ?.focus();
-        }}
+      <form
+        onSubmit={onSubmit}
+        noValidate
+        className={styles.form}
+        aria-busy={pending}
       >
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            id={`auth-tab-${t.id}`}
-            type="button"
-            role="tab"
-            aria-selected={mode === t.id}
-            aria-controls="auth-panel"
-            tabIndex={mode === t.id ? 0 : -1}
-            onClick={() => switchMode(t.id)}
-            className={cx(styles.tab, mode === t.id && styles.tabOn)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+        <FormAlert message={formError} />
 
-      <div id="auth-panel" role="tabpanel" aria-labelledby={`auth-tab-${mode}`}>
-        <form
-          onSubmit={onSubmit}
-          noValidate
-          className={styles.form}
-          aria-busy={pending}
-        >
-          <FormAlert message={formError} />
-
-          {mode === "register" && (
-            <Field id="auth-name" label="Имя" error={errors.name?.message}>
-              <input
-                id="auth-name"
-                type="text"
-                autoComplete="name"
-                placeholder="Как к вам обращаться"
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={errorId("auth-name", errors.name?.message)}
-                className={input}
-                {...register("name")}
-              />
-            </Field>
-          )}
-
-          <Field
-            id="auth-email"
-            label="Эл. почта"
-            error={errors.email?.message}
-          >
+        {mode === "register" && (
+          <Field id="auth-name" label="Имя" error={errors.name?.message}>
             <input
-              id="auth-email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              placeholder="name@mail.ru"
-              aria-invalid={Boolean(errors.email)}
-              aria-describedby={errorId("auth-email", errors.email?.message)}
+              id="auth-name"
+              type="text"
+              autoComplete="name"
+              placeholder="Как к вам обращаться"
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errorId("auth-name", errors.name?.message)}
               className={input}
-              {...register("email")}
+              {...register("name")}
             />
           </Field>
+        )}
 
-          <Field
-            id="auth-pass"
-            label="Пароль"
-            error={errors.password?.message}
-            aside={
-              mode === "login" && (
-                <a href="#" className={styles.forgot}>
-                  Забыли пароль?
-                </a>
-              )
-            }
-          >
-            <div className={styles.passWrap}>
-              <input
-                id="auth-pass"
-                type={showPass ? "text" : "password"}
-                autoComplete={
-                  mode === "register" ? "new-password" : "current-password"
-                }
-                placeholder="Минимум 8 символов"
-                aria-invalid={Boolean(errors.password)}
-                aria-describedby={errorId(
-                  "auth-pass",
-                  errors.password?.message,
-                )}
-                className={cx(input, styles.passInput)}
-                {...register("password")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass((v) => !v)}
-                aria-label={showPass ? "Скрыть пароль" : "Показать пароль"}
-                className={styles.eye}
-              >
-                <Icon name="eye" size={20} />
-              </button>
-            </div>
-          </Field>
+        <Field
+          id="auth-email"
+          label="Эл. почта"
+          error={errors.email?.message}
+        >
+          <input
+            id="auth-email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            placeholder="name@mail.ru"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errorId("auth-email", errors.email?.message)}
+            className={input}
+            {...register("email")}
+          />
+        </Field>
 
-          <button type="submit" disabled={pending} className={styles.submit}>
-            {mode === "register" ? "Создать аккаунт" : "Войти"}
-          </button>
-        </form>
-      </div>
+        <Field
+          id="auth-pass"
+          label="Пароль"
+          error={errors.password?.message}
+          aside={
+            mode === "login" && (
+              <a href="#" className={styles.forgot}>
+                Забыли пароль?
+              </a>
+            )
+          }
+        >
+          <div className={styles.passWrap}>
+            <input
+              id="auth-pass"
+              type={showPass ? "text" : "password"}
+              autoComplete={
+                mode === "register" ? "new-password" : "current-password"
+              }
+              placeholder="Минимум 8 символов"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errorId(
+                "auth-pass",
+                errors.password?.message,
+              )}
+              className={cx(input, styles.passInput)}
+              {...register("password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass((v) => !v)}
+              aria-label={showPass ? "Скрыть пароль" : "Показать пароль"}
+              className={styles.eye}
+            >
+              <Icon name="eye" size={20} />
+            </button>
+          </div>
+        </Field>
+
+        <button type="submit" disabled={pending} className={styles.submit}>
+          {mode === "register" ? "Создать аккаунт" : "Войти"}
+        </button>
+      </form>
 
       <div className={styles.divider}>
         <span className={styles.line} />

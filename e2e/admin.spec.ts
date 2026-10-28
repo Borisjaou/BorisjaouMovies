@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import { catalogCards, E2E_ADMIN_EMAIL, isDesktop, login, pngBuffer, register, uniqueEmail } from "./helpers";
+import { catalogCards, E2E_ADMIN_EMAIL, isDesktop, login, pngBuffer, register, registerViaForm, uniqueEmail } from "./helpers";
 
 const ADMIN_PASSWORD = "admin-password-123";
 
-/** Администратор: при первом запуске на чистой базе регистрируется (почта из ADMIN_EMAILS), дальше входит */
+/** Администратор: при первом запуске на чистой базе регистрируется по прямой ссылке (почта из ADMIN_EMAILS), дальше входит */
 async function signInAsAdmin(page: Page) {
   await login(page, E2E_ADMIN_EMAIL, ADMIN_PASSWORD, "/admin/films");
   const wrong = page.getByRole("alert").filter({ hasText: "Неверная эл. почта или пароль" });
@@ -13,7 +13,7 @@ async function signInAsAdmin(page: Page) {
   ]);
   if (outcome === "admin") return;
   expect(outcome, "ни входа, ни ошибки «Неверная эл. почта или пароль»").toBe("no-account");
-  await register(page, E2E_ADMIN_EMAIL, ADMIN_PASSWORD, "/admin/films");
+  await registerViaForm(page, E2E_ADMIN_EMAIL, ADMIN_PASSWORD, "/admin/films");
   await page.waitForURL(/\/admin\/films$/);
 }
 
@@ -63,7 +63,7 @@ test.describe("Добавление фильма", () => {
     // Живая карточка
     const slug = `proverka-${title.split(" ")[1]}`;
     await expect(page.getByText(`borisjaou.app/film/${slug}`).locator("visible=true")).toBeVisible();
-    await expect(page.getByText("2026 · Детектив · 16+ · 1 ч 35 мин").locator("visible=true")).toBeVisible();
+    await expect(page.getByText("2026 · Детектив · 1 ч 35 мин").locator("visible=true")).toBeVisible();
     await expect(page.getByRole("img", { name: "Постер фильма" }).locator("visible=true")).toBeVisible();
 
     await page.getByRole("button", { name: "Опубликовать" }).locator("visible=true").click();

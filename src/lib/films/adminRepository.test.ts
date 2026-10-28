@@ -36,7 +36,7 @@ describe("admin films repository", () => {
       slug: "lunnyy-sad",
       posterUrl: null,
     });
-    expect(draft).toMatchObject({ slug: "lunnyy-sad", status: "draft", rating: null, popularity: 0 });
+    expect(draft).toMatchObject({ slug: "lunnyy-sad", status: "draft", popularity: 0 });
     expect(draft.shortDescription).toBe("Сад на Луне.");
     expect(draft.posterColor).toBe(posterLookFor("lunnyy-sad").posterColor);
     expect(await site.getFilmBySlug("lunnyy-sad")).toBeNull();

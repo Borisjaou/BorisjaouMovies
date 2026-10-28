@@ -8,7 +8,7 @@
   color: var(--muted);
 }
 
-/* ---------- Общие: теги и рейтинг (мобила / ПК) ---------- */
+/* ---------- Общие: теги (мобила / ПК) ---------- */
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -32,45 +32,13 @@
   }
 }
 
-.tagOutline {
-  background: transparent;
-  border: 1px solid var(--line);
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--muted);
-
-  @include bp.from(lg) {
-    font-size: 15px;
-  }
-}
-
-.star {
-  flex-shrink: 0;
-  color: var(--star);
-
-  @include bp.from(lg) {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-.ratingValue {
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--ink);
-
-  @include bp.from(lg) {
-    font-size: 22px;
-  }
-}
-
 .heartOn {
   color: var(--heart);
+}
+
+/* «Надо посмотреть» / «Просмотрено» включены */
+.listOn {
+  color: var(--accent);
 }
 
 /* ================= Мобила ================= */
@@ -212,6 +180,31 @@
   &.heartOn {
     color: var(--heart);
   }
+}
+
+/* Под основными кнопками: «Надо посмотреть» / «Просмотрено» */
+.mLists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mList {
+  height: 48px;
+  padding: 0 8px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .mFavStatus {

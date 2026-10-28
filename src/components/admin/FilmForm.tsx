@@ -3,16 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ChangeEvent, type DragEvent, type ReactNode } from "react";
-import { saveFilmAction, type SavedFilm, type SaveFilmResult } from "@/app/admin/films/actions";
+import { importFilmAction, saveFilmAction, type SavedFilm, type SaveFilmResult } from "@/app/admin/films/actions";
 import { Icon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { Chip } from "@/components/ui/Chip";
 import { errorId, Field } from "@/components/ui/Field";
 import { FormAlert } from "@/components/ui/FormAlert";
 import inputStyles from "@/components/ui/Input.module.scss";
-import { Segmented } from "@/components/ui/Segmented";
 import { cx } from "@/lib/cx";
-import { AGE_RATINGS, COUNTRIES, FILM_LINK_BASE, FILTER_GENRES, GENRES, type Genre } from "@/lib/films/constants";
+import { COUNTRIES, FILM_LINK_BASE, FILTER_GENRES, GENRES, type Genre } from "@/lib/films/constants";
 import {
   checkFilmForm,
   DESCRIPTION_MAX,
@@ -33,7 +32,7 @@ import styles from "./FilmForm.module.scss";
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
 type Layout = "f" | "d"; // префиксы id как в эталоне: f-… (AdminAdd), d-… (DeskAdminAdd)
-type TextField = Exclude<FilmFormField, "genres" | "ageRating" | "isNew">;
+type TextField = Exclude<FilmFormField, "genres" | "isNew">;
 type ErrorKey = FilmFormField | "poster";
 
 export interface FilmFormProps {
@@ -68,6 +67,11 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedFilm | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  // Автозаполнение по ссылке
+  const [importLink, setImportLink] = useState("");
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importNote, setImportNote] = useState<string | null>(null);
+  const [importing, startImport] = useTransition();
 
   // Ссылка на локальный файл освобождается при замене постера и при уходе со страницы
   useEffect(() => {
@@ -108,13 +112,94 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     setPoster({ file, url: URL.createObjectURL(file) });
   };
 
+  // ---- Автозаполнение: Кинопоиск / TMDB / IMDb ----
+  const runImport = () => {
+    setImportError(null);
+    setImportNote(null);
+    startImport(async () => {
+      let result: Awaited<ReturnType<typeof importFilmAction>>;
+      try {
+        result = await importFilmAction(importLink);
+      } catch {
+        setImportError("Не удалось получить данные. Проверьте соединение и попробуйте ещё раз");
+        return;
+      }
+      if (!result.ok) {
+        setImportError(result.error);
+        return;
+      }
+      const v = result.values;
+      // Пустое у источника не стирает то, что уже введено
+      setValues((cur) => ({
+        ...cur,
+        title: v.title || cur.title,
+        originalTitle: v.originalTitle || cur.originalTitle,
+        year: v.year || cur.year,
+        durationMin: v.durationMin || cur.durationMin,
+        genres: v.genres.length ? v.genres : cur.genres,
+        country: v.country || cur.country,
+        director: v.director || cur.director,
+        cast: v.cast || cur.cast,
+        description: v.description || cur.description,
+        trailerUrl: v.trailerUrl || cur.trailerUrl,
+      }));
+      setServerErrors({});
+      if (result.poster) {
+        const bytes = Uint8Array.from(atob(result.poster.data), (c) => c.charCodeAt(0));
+        await pickPoster(new File([bytes], result.poster.name, { type: result.poster.type }));
+      }
+      const from = result.source === "kinopoisk" ? "Кинопоиска" : "TMDB";
+      setImportNote(
+        `Заполнено с ${from}${result.poster ? "" : ", постер не найден"}. Проверьте поля перед сохранением`,
+      );
+    });
+  };
+
+  const importBox = (p: Layout) => {
+    const id = `${p}-import`;
+    return (
+      <div className={styles.importBox}>
+        <Field id={id} label="Ссылка на фильм" error={importError ?? undefined}>
+          <div className={styles.importRow}>
+            <input
+              id={id}
+              type="url"
+              value={importLink}
+              onChange={(e) => setImportLink(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (importLink.trim()) runImport();
+                }
+              }}
+              placeholder="kinopoisk.ru/film/… или themoviedb.org/movie/…"
+              aria-invalid={Boolean(importError)}
+              aria-describedby={errorId(id, importError ?? undefined)}
+              className={cx(input(p), styles.importInput)}
+            />
+            <button
+              type="button"
+              onClick={runImport}
+              disabled={importing || !importLink.trim()}
+              className={styles.importBtn}
+            >
+              {importing ? "Загрузка…" : "Заполнить"}
+            </button>
+          </div>
+        </Field>
+        <p role="status" className={styles.importNote}>
+          {importNote ?? "Кинопоиск, TMDB или IMDb — поля и постер заполнятся сами"}
+        </p>
+      </div>
+    );
+  };
+
   // ---- Живая карточка «Как увидят зрители» ----
   const slug = fixedSlug ?? slugify(values.title);
   const duration = /^\d+$/.test(values.durationMin.trim()) ? Number(values.durationMin) : 0;
   const metaParts = [
     values.year.trim() || "Год",
     values.genres.length ? values.genres.slice(0, 2).join(", ") : "Жанр",
-    values.ageRating,
   ];
   if (duration) metaParts.push(`${Math.floor(duration / 60)} ч ${duration % 60} мин`);
   const preview = {
@@ -190,7 +275,6 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     ];
     for (const key of texts) fd.set(key, values[key]);
     for (const g of values.genres) fd.append("genres", g);
-    fd.set("ageRating", values.ageRating);
     fd.set("isNew", values.isNew ? "1" : "0");
     if (poster.file) fd.set("poster", poster.file);
 
@@ -343,18 +427,6 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     </div>
   );
 
-  const ages = (p: Layout) => (
-    <Segmented
-      options={AGE_RATINGS.map((a) => ({ id: a, label: a }))}
-      value={values.ageRating || null}
-      onChange={(a) => set("ageRating", a)}
-      ariaLabel="Возрастной рейтинг"
-      itemHeight={p === "d" ? 40 : 42}
-      fontSize={14}
-      className={p === "d" ? styles.dAges : undefined}
-    />
-  );
-
   const posterBox = (p: Layout) => {
     const id = `${p}-poster`;
     const desktop = p === "d";
@@ -464,6 +536,10 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
 
         <main className={styles.mMain}>
           {alert}
+          <section className={styles.mSection}>
+            <h2 className={styles.mH2}>Автозаполнение</h2>
+            {importBox("f")}
+          </section>
           <section className={styles.mTopSection}>
             {posterBox("f")}
             <div className={styles.mPreview}>
@@ -491,11 +567,6 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
             {genreChips("f")}
           </section>
 
-          <section className={cx(styles.mSection, styles.gap12)}>
-            <h2 className={styles.mH2}>Возрастной рейтинг</h2>
-            {ages("f")}
-          </section>
-
           <section className={styles.mSection}>
             <h2 className={styles.mH2}>Детали</h2>
             {country("f")}
@@ -521,6 +592,10 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
           <h1 className={styles.dTitle}>{heading}</h1>
           {alert}
           <section className={styles.card}>
+            <h2 className={styles.dH2}>Автозаполнение</h2>
+            {importBox("d")}
+          </section>
+          <section className={styles.card}>
             <h2 className={styles.dH2}>Основное</h2>
             <div className={styles.grid}>
               {title("d")}
@@ -534,10 +609,6 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
           <section className={styles.card}>
             {genresHeading("d")}
             {genreChips("d")}
-            <div className={styles.dAgeBlock}>
-              <div className={styles.dAgeLabel}>Возрастной рейтинг</div>
-              {ages("d")}
-            </div>
           </section>
 
           <section className={styles.card}>

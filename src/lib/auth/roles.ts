@@ -4,6 +4,7 @@ export type Role = (typeof ROLES)[number];
 /**
  * Администраторы задаются в .env: ADMIN_EMAILS=boss@mail.ru,editor@mail.ru
  * Роль выдаётся при регистрации / первом входе через Google.
+ * Регистрация открыта только для этих адресов.
  */
 export function isAdminEmail(email: string, list = process.env.ADMIN_EMAILS ?? ""): boolean {
   const target = email.trim().toLowerCase();

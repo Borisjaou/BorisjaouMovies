@@ -8,8 +8,8 @@ interface ChipProps {
   onClick: () => void;
   /** Галочка у выбранного (жанры в Filters, «Все жанры» в DeskCatalog) */
   check?: boolean;
-  /** md — padding 0 16 (каталог), sm — 0 14 (фильтры), age — ширина 56 */
-  size?: "md" | "sm" | "age";
+  /** md — padding 0 16 (каталог), sm — 0 14 (фильтры) */
+  size?: "md" | "sm";
   className?: string;
 }
 

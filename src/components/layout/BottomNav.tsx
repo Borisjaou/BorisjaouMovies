@@ -4,22 +4,24 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Icon, type IconName } from "@/components/icons";
 import { cx } from "@/lib/cx";
-import { useFavorites } from "@/lib/favorites";
+import { SHELF_ORDER, SHELVES, type ShelfId } from "@/lib/shelves";
+import { useShelves } from "@/lib/useShelf";
 import styles from "./BottomNav.module.scss";
 
-export type BottomNavItem = "catalog" | "genres" | "favorites" | "profile";
+export type BottomNavItem = "catalog" | "genres" | ShelfId | "profile";
 
-const ITEMS: ReadonlyArray<{ id: BottomNavItem; href: string; label: string; icon: IconName }> = [
+const ITEMS: ReadonlyArray<{ id: BottomNavItem; href: string; label: string; icon: IconName; shelf?: ShelfId }> = [
   { id: "catalog", href: "/", label: "Каталог", icon: "home" },
   { id: "genres", href: "/genres", label: "Жанры", icon: "grid" },
-  { id: "favorites", href: "/favorites", label: "Избранное", icon: "heart" },
+  // «Надо посмотреть», «Просмотрено», «Избранное»
+  ...SHELF_ORDER.map((id) => ({ id, href: SHELVES[id].path, label: SHELVES[id].navLabel, icon: SHELVES[id].icon, shelf: id })),
   // Гость — на вход, вошедший — на экран профиля
   { id: "profile", href: "/profile", label: "Профиль", icon: "user" },
 ];
 
-/** Нижнее меню мобильной раскладки (Catalog / Genres / Favorites) */
+/** Нижнее меню мобильной раскладки */
 export function BottomNav({ active }: { active: BottomNavItem }) {
-  const { count, ready } = useFavorites();
+  const shelves = useShelves();
   const { status } = useSession();
   const hrefOf = (item: (typeof ITEMS)[number]) =>
     item.id === "profile" && status !== "authenticated" ? "/login?callbackUrl=%2Fprofile" : item.href;
@@ -28,6 +30,7 @@ export function BottomNav({ active }: { active: BottomNavItem }) {
     <nav aria-label="Основная навигация" className={cx(styles.nav, "only-mobile")}>
       {ITEMS.map((item) => {
         const on = item.id === active;
+        const list = item.shelf ? shelves[item.shelf] : null;
         return (
           <Link
             key={item.id}
@@ -36,9 +39,9 @@ export function BottomNav({ active }: { active: BottomNavItem }) {
             className={cx(styles.item, on && styles.on)}
           >
             <span className={styles.icon}>
-              {/* Залитое сердце — только у активного «Избранного» */}
-              <Icon name={item.icon} size={22} filled={item.id === "favorites" && on} />
-              {item.id === "favorites" && ready && <span className={styles.badge}>{count}</span>}
+              {/* Залитая иконка — только у активного раздела-списка (у «Просмотрено» контур) */}
+              <Icon name={item.icon} size={22} filled={Boolean(item.shelf) && on && item.id !== "watched"} />
+              {list?.ready && <span className={styles.badge}>{list.count}</span>}
             </span>
             {item.label}
           </Link>

@@ -112,6 +112,25 @@ const ICONS = {
       </>
     ),
   },
+  // Не из эталона: разделы «Надо посмотреть» и «Просмотрено», в той же манере, что heart
+  bookmark: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linejoin: "round",
+    body: <path d="M6.5 4h11a1 1 0 0 1 1 1v15l-6.5-4.2L5.5 20V5a1 1 0 0 1 1-1z" />,
+  },
+  watched: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linecap: "round",
+    linejoin: "round",
+    body: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M8.3 12.3l2.6 2.6 5-5.4" />
+      </>
+    ),
+  },
   link: {
     kind: "stroke",
     strokeWidth: 1.8,

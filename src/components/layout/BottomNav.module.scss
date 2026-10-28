@@ -3,8 +3,10 @@
   bottom: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 8px 12px 14px;
+  /* 6 пунктов: колонки по ширине подписи, чтобы «Просмотрено» помещалось на 360px */
+  grid-template-columns: repeat(6, auto);
+  justify-content: space-between;
+  padding: 8px 8px 14px;
   border-top: 1px solid var(--line);
   background: var(--nav);
 }
@@ -15,7 +17,9 @@
   align-items: center;
   gap: 4px;
   padding: 4px 0;
-  font-size: 11px;
+  font-size: 10px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
   font-weight: 400;
   color: var(--muted);
   text-decoration: none;
@@ -23,7 +27,7 @@
 
 .icon {
   position: relative;
-  width: 56px;
+  width: 52px;
   height: 30px;
   border-radius: 15px;
   display: flex;
@@ -42,7 +46,7 @@
 .badge {
   position: absolute;
   top: 0;
-  right: 8px;
+  right: 4px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;

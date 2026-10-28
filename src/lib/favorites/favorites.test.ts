@@ -71,14 +71,10 @@ describe("favoriteFilms", () => {
     { filmId: 1, addedAt: 3 },
     { filmId: 2, addedAt: 4 },
   ];
-  const titles = (sort: "recent" | "rating" | "year") => favoriteFilms(FILMS, entries, sort).map((f) => f.title);
+  const titles = (sort: "recent" | "year") => favoriteFilms(FILMS, entries, sort).map((f) => f.title);
 
   it("Недавние", () => {
     expect(titles("recent")).toEqual(["Орбита 9", "Тихий берег", "Бумажный кит", "Звёздная пыль"]);
-  });
-
-  it("Рейтинг", () => {
-    expect(titles("rating")).toEqual(["Орбита 9", "Тихий берег", "Бумажный кит", "Звёздная пыль"]);
   });
 
   it("Год", () => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AGE_RATINGS, GENRES, type AgeRating, type Genre } from "./constants";
+import { GENRES, type Genre } from "./constants";
 import type { Film } from "./types";
 
 /**
@@ -20,7 +20,6 @@ export interface FilmFormValues {
   year: string;
   durationMin: string;
   genres: Genre[];
-  ageRating: AgeRating | "";
   /** "" — «Не указана» */
   country: string;
   director: string;
@@ -37,7 +36,6 @@ export const EMPTY_FILM_FORM: FilmFormValues = {
   year: "",
   durationMin: "",
   genres: [],
-  ageRating: "16+", // в эталоне по умолчанию выбран 16+
   country: "",
   director: "",
   cast: "",
@@ -53,7 +51,6 @@ export interface FilmInput {
   year: number;
   durationMin: number | null;
   genres: Genre[];
-  ageRating: AgeRating | null;
   country: string | null;
   director: string | null;
   cast: string[];
@@ -93,7 +90,6 @@ const formatSchema = z.object({
     .refine((v) => v === "" || (/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= 999), FILM_FORM_MESSAGES.duration)
     .transform((v) => (v ? Number(v) : null)),
   genres: z.array(z.enum(GENRES)),
-  ageRating: z.union([z.enum(AGE_RATINGS), z.literal("")]).transform((v) => v || null),
   country: optionalText(60),
   director: optionalText(120),
   cast: z
@@ -160,7 +156,6 @@ export function filmFormValuesFromFormData(fd: FormData): FilmFormValues {
     const v = fd.get(k);
     return typeof v === "string" ? v : "";
   };
-  const age = str("ageRating");
   return {
     title: str("title"),
     originalTitle: str("originalTitle"),
@@ -168,7 +163,6 @@ export function filmFormValuesFromFormData(fd: FormData): FilmFormValues {
     durationMin: str("durationMin"),
     // Порядок из формы (первый жанр показывается в карточке), только известные и без повторов
     genres: [...new Set(fd.getAll("genres"))].flatMap((v) => GENRES.filter((g) => g === v)),
-    ageRating: AGE_RATINGS.find((a) => a === age) ?? "",
     country: str("country"),
     director: str("director"),
     cast: str("cast"),
@@ -186,7 +180,6 @@ export function filmToFormValues(film: Film): FilmFormValues {
     year: String(film.year),
     durationMin: film.durationMin === null ? "" : String(film.durationMin),
     genres: [...film.genres],
-    ageRating: film.ageRating ?? "",
     country: film.country ?? "",
     director: film.director ?? "",
     cast: film.cast.join(", "),

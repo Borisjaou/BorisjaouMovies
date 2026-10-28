@@ -45,7 +45,6 @@ export function createAdminFilmsRepository(db: PrismaClient) {
       originalTitle: input.originalTitle,
       year: input.year,
       durationMin: input.durationMin,
-      ageRating: input.ageRating,
       country: input.country,
       director: input.director,
       cast: input.cast.join("\n"),

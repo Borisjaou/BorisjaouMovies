@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import { cx } from "@/lib/cx";
-import { AuthForm } from "./AuthForm";
+import { AuthForm, type AuthMode } from "./AuthForm";
 import styles from "./AuthView.module.scss";
 
 const TITLE = "Всё ваше кино — в одном месте";
@@ -25,7 +25,15 @@ function Posters({ className }: { className?: string }) {
 }
 
 /** Вход: Main.dc.html (до 1023px) / DeskAuth.dc.html (с 1024px) */
-export function AuthView({ callbackUrl }: { callbackUrl: string }) {
+export function AuthView({
+  callbackUrl,
+  mode,
+  initialError,
+}: {
+  callbackUrl: string;
+  mode: AuthMode;
+  initialError?: string | null;
+}) {
   return (
     <div className={styles.page}>
       {/* ПК: левая панель */}
@@ -54,7 +62,12 @@ export function AuthView({ callbackUrl }: { callbackUrl: string }) {
             <p className={styles.mText}>{TEXT}</p>
           </div>
 
-          <AuthForm callbackUrl={callbackUrl} headingClassName={styles.dHeading} />
+          <AuthForm
+            callbackUrl={callbackUrl}
+            mode={mode}
+            initialError={initialError}
+            headingClassName={styles.dHeading}
+          />
 
           <Link href="/" className={styles.guest}>
             Смотреть без входа

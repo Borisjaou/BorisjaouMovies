@@ -4,13 +4,15 @@ import {
   catalogHref,
   parseCatalogQuery,
   searchParamsToRecord,
+  shelfOf,
   stringifyCatalogQuery,
   toFilmFilters,
+  withShelf,
 } from "./params";
 
 describe("parseCatalogQuery", () => {
   it("пустой URL → значения по умолчанию", () => {
-    expect(parseCatalogQuery({})).toEqual({ ...EMPTY_QUERY, yearFrom: undefined, yearTo: undefined, rating: undefined, duration: undefined, country: undefined });
+    expect(parseCatalogQuery({})).toEqual({ ...EMPTY_QUERY, yearFrom: undefined, yearTo: undefined, duration: undefined, country: undefined, list: undefined });
   });
 
   it("разбирает все параметры и повторяющиеся ключи", () => {
@@ -20,11 +22,9 @@ describe("parseCatalogQuery", () => {
       decade: ["2020s", "2010s"],
       from: "2010",
       to: "2026",
-      rating: "7",
       duration: "long",
-      age: ["16+", "18+"],
       country: "США",
-      sort: "rating",
+      sort: "new",
       fav: "1",
     });
     expect(q).toEqual({
@@ -33,12 +33,11 @@ describe("parseCatalogQuery", () => {
       decades: ["2020s", "2010s"],
       yearFrom: 2010,
       yearTo: 2026,
-      rating: "7",
       duration: "long",
-      ages: ["16+", "18+"],
       country: "США",
-      sort: "rating",
+      sort: "new",
       fav: true,
+      list: undefined,
     });
   });
 
@@ -47,19 +46,17 @@ describe("parseCatalogQuery", () => {
       genre: ["Драма", "Вестерн"],
       decade: "1970s",
       from: "20x0",
-      rating: "any",
       duration: "huge",
-      age: "21+",
       country: "Марс",
+      list: "later",
       sort: "abc",
       fav: "yes",
     });
     expect(q.genres).toEqual(["Драма"]);
     expect(q.decades).toEqual([]);
     expect(q.yearFrom).toBeUndefined();
-    expect(q.rating).toBeUndefined();
     expect(q.duration).toBeUndefined();
-    expect(q.ages).toEqual([]);
+    expect(q.list).toBeUndefined();
     expect(q.country).toBeUndefined();
     expect(q.sort).toBe("popular");
     expect(q.fav).toBe(false);
@@ -73,7 +70,7 @@ describe("stringifyCatalogQuery / catalogHref", () => {
   });
 
   it("туда и обратно без потерь", () => {
-    const query = parseCatalogQuery({ q: "кит", genre: ["Анимация", "Драма"], decade: "2020s", rating: "8", sort: "new", fav: "1" });
+    const query = parseCatalogQuery({ q: "кит", genre: ["Анимация", "Драма"], decade: "2020s", sort: "new", fav: "1" });
     const back = parseCatalogQuery(searchParamsToRecord(new URLSearchParams(stringifyCatalogQuery(query))));
     expect(back).toEqual(query);
   });
@@ -83,10 +80,26 @@ describe("stringifyCatalogQuery / catalogHref", () => {
   });
 });
 
+describe("Списки просмотра в URL", () => {
+  it("list=watchlist / watched; вместе с fav=1 побеждает избранное", () => {
+    expect(parseCatalogQuery({ list: "watched" }).list).toBe("watched");
+    expect(shelfOf(parseCatalogQuery({ list: "watchlist" }))).toBe("watchlist");
+    expect(shelfOf(parseCatalogQuery({ list: "watchlist", fav: "1" }))).toBe("favorites");
+    expect(shelfOf(EMPTY_QUERY)).toBeNull();
+  });
+
+  it("withShelf переключает режим и пишется в адрес", () => {
+    expect(catalogHref(withShelf(EMPTY_QUERY, "watched"))).toBe("/?list=watched");
+    expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), "favorites"))).toBe("/?fav=1");
+    expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), null))).toBe("/");
+  });
+});
+
 describe("toFilmFilters", () => {
   it("переносит все поля, кроме режима «Избранное»", () => {
-    const f = toFilmFilters({ ...EMPTY_QUERY, q: "a", genres: ["Драма"], rating: "7", sort: "rating", fav: true });
-    expect(f).toMatchObject({ query: "a", genres: ["Драма"], rating: "7", sort: "rating" });
+    const f = toFilmFilters({ ...EMPTY_QUERY, q: "a", genres: ["Драма"], duration: "short", sort: "new", fav: true });
+    expect(f).toMatchObject({ query: "a", genres: ["Драма"], duration: "short", sort: "new" });
     expect(f).not.toHaveProperty("fav");
+    expect(f).not.toHaveProperty("list");
   });
 });

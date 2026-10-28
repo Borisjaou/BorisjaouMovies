@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { isDesktop, register, uniqueEmail } from "./helpers";
+import { createUser, isDesktop, register, uniqueEmail } from "./helpers";
 
 test.describe("Шапка вошедшего и выход", () => {
   test("ПК: имя и «Выйти» вместо «Войти», выход возвращает гостя", async ({ page }, testInfo) => {
@@ -32,11 +32,10 @@ test.describe("Шапка вошедшего и выход", () => {
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fprofile/);
 
     const email = uniqueEmail("profile");
-    await page.getByRole("tab", { name: "Регистрация" }).click();
-    await page.getByLabel("Имя").fill("Тестовый зритель");
+    createUser(email);
     await page.getByLabel("Эл. почта").fill(email);
     await page.getByLabel("Пароль", { exact: true }).fill("password123");
-    await page.getByRole("button", { name: "Создать аккаунт" }).click();
+    await page.getByRole("button", { name: "Войти" }).click();
     await expect(page).toHaveURL(/\/profile$/);
 
     await expect(page.getByRole("heading", { name: "Профиль" })).toBeVisible();

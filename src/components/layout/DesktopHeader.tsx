@@ -6,28 +6,32 @@ import { AccountActions } from "@/components/account/AccountActions";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { cx } from "@/lib/cx";
-import { useFavorites } from "@/lib/favorites";
+import { catalogHref as hrefOf, EMPTY_QUERY, withShelf, type CatalogQuery } from "@/lib/films/params";
+import { SHELF_ORDER, SHELVES, type ShelfId } from "@/lib/shelves";
+import { useShelves } from "@/lib/useShelf";
 import styles from "./DesktopHeader.module.scss";
 
-export type DesktopSection = "catalog" | "genres" | "favorites";
+export type DesktopSection = "catalog" | "genres" | ShelfId;
 
 interface DesktopHeaderProps {
   active: DesktopSection;
   catalogHref: string;
-  favoritesHref: string;
+  /** Запрос каталога, с которым открываются разделы-списки (фильтры и сортировка сохраняются) */
+  shelfQuery?: CatalogQuery;
   /** Поле поиска: на каталоге — с задержкой, на остальных — форма на / */
   search: ReactNode;
   isAdmin: boolean;
 }
 
 /** Шапка ПК: DeskCatalog / DeskGenres */
-export function DesktopHeader({ active, catalogHref, favoritesHref, search, isAdmin }: DesktopHeaderProps) {
-  const { count, ready } = useFavorites();
+export function DesktopHeader({ active, catalogHref, shelfQuery = EMPTY_QUERY, search, isAdmin }: DesktopHeaderProps) {
+  const shelves = useShelves();
 
-  const items: ReadonlyArray<{ id: DesktopSection; href: string; label: string }> = [
+  // «Надо посмотреть» и «Просмотрено» — перед «Избранным»
+  const items: ReadonlyArray<{ id: DesktopSection; href: string; label: string; shelf?: ShelfId }> = [
     { id: "catalog", href: catalogHref, label: "Каталог" },
     { id: "genres", href: "/genres", label: "Жанры" },
-    { id: "favorites", href: favoritesHref, label: "Избранное" },
+    ...SHELF_ORDER.map((id) => ({ id, href: hrefOf(withShelf(shelfQuery, id)), label: SHELVES[id].title, shelf: id })),
   ];
 
   return (
@@ -44,7 +48,9 @@ export function DesktopHeader({ active, catalogHref, favoritesHref, search, isAd
               className={cx(styles.navItem, item.id === active && styles.navOn)}
             >
               {item.label}
-              {item.id === "favorites" && ready && <span className={styles.badge}>{count}</span>}
+              {item.shelf && shelves[item.shelf].ready && (
+                <span className={styles.badge}>{shelves[item.shelf].count}</span>
+              )}
             </Link>
           ))}
         </nav>

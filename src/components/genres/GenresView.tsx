@@ -22,7 +22,6 @@ export function GenresView({ isAdmin }: { isAdmin: boolean }) {
       <DesktopHeader
         active="genres"
         catalogHref="/"
-        favoritesHref={catalogHref({ ...EMPTY_QUERY, fav: true })}
         isAdmin={isAdmin}
         search={
           // Поиск на странице жанров открывает каталог с запросом

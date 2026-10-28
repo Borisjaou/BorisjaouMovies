@@ -43,7 +43,7 @@ export function createFilmsRepository(db: PrismaClient) {
 
   /**
    * «Похожие фильмы»: опубликованные, кроме самого фильма.
-   * Сначала больше общих жанров, затем выше рейтинг, популярнее, раньше добавлен.
+   * Сначала больше общих жанров, затем популярнее, раньше добавлен.
    */
   async function getSimilarFilms(film: Film, limit = 5): Promise<Film[]> {
     const base = { status: "published", id: { not: film.id } } as const;
@@ -59,7 +59,6 @@ export function createFilmsRepository(db: PrismaClient) {
       .sort(
         (a, b) =>
           b.shared - a.shared ||
-          (b.f.rating ?? -1) - (a.f.rating ?? -1) ||
           b.f.popularity - a.f.popularity ||
           a.f.id - b.f.id,
       )
@@ -70,7 +69,7 @@ export function createFilmsRepository(db: PrismaClient) {
 
     const rest = await db.film.findMany({
       where: { ...base, id: { notIn: [film.id, ...byGenre.map((f) => f.id)] } },
-      orderBy: [{ rating: { sort: "desc", nulls: "last" } }, { popularity: "desc" }, { id: "asc" }],
+      orderBy: [{ popularity: "desc" }, { id: "asc" }],
       include: FILM_INCLUDE,
       take: limit - byGenre.length,
     });

@@ -11,6 +11,7 @@ import {
   type FilmFormField,
   type RequiredField,
 } from "@/lib/films/filmForm";
+import { importFilm, IMPORT_MESSAGES, ImportError, type ImportedFilm } from "@/lib/films/import";
 import { slugify } from "@/lib/films/slugify";
 import type { FilmStatus } from "@/lib/films/types";
 import { detectImage, POSTER_ERROR, POSTER_MAX_BYTES, POSTER_TYPES } from "@/lib/storage/image";
@@ -110,5 +111,58 @@ export async function saveFilmAction(formData: FormData): Promise<SaveFilmResult
   } catch {
     if (stored) await storage.deleteByUrl(stored.url);
     return fail({ formError: FAILED_TEXT });
+  }
+}
+
+// ---- Автозаполнение по ссылке (Кинопоиск / TMDB / IMDb) ----
+
+export type ImportFilmResult =
+  | {
+      ok: true;
+      values: Omit<ImportedFilm, "posterUrl" | "source">;
+      source: ImportedFilm["source"];
+      /** Постер в base64 — форма превращает его в файл, как при ручной загрузке */
+      poster: { data: string; type: string; name: string } | null;
+    }
+  | { ok: false; error: string };
+
+/** Откуда можно скачивать постер (адрес приходит от API, а не от пользователя) */
+const POSTER_HOSTS = [/^kinopoiskapiunofficial\.tech$/, /\.mds\.yandex\.net$/, /^image\.tmdb\.org$/];
+
+async function downloadPoster(url: string | null): Promise<{ data: string; type: string; name: string } | null> {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:" || !POSTER_HOSTS.some((h) => h.test(u.hostname))) return null;
+    const res = await fetch(u, { redirect: "follow" });
+    if (!res.ok) return null;
+    if (Number(res.headers.get("content-length") ?? 0) > POSTER_MAX_BYTES) return null;
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (bytes.length > POSTER_MAX_BYTES) return null;
+    const kind = detectImage(bytes);
+    if (!kind || !POSTER_TYPES.includes(kind.extension)) return null;
+    return { data: Buffer.from(bytes).toString("base64"), type: kind.contentType, name: `poster.${kind.extension}` };
+  } catch {
+    return null;
+  }
+}
+
+const linkSchema = z.string().trim().min(1).max(500);
+
+export async function importFilmAction(link: string): Promise<ImportFilmResult> {
+  await requireAdmin();
+  const parsedLink = linkSchema.safeParse(link);
+  if (!parsedLink.success) return { ok: false, error: IMPORT_MESSAGES.badLink };
+  try {
+    const film = await importFilm(parsedLink.data, {
+      kinopoisk: process.env.KINOPOISK_API_KEY,
+      tmdb: process.env.TMDB_API_KEY,
+    });
+    const { posterUrl, source, ...values } = film;
+    return { ok: true, values, source, poster: await downloadPoster(posterUrl) };
+  } catch (error) {
+    if (error instanceof ImportError) return { ok: false, error: error.message };
+    console.error("importFilmAction", error);
+    return { ok: false, error: IMPORT_MESSAGES.failed };
   }
 }

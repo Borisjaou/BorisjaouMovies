@@ -8,7 +8,9 @@ import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { cx } from "@/lib/cx";
 import { useFavorites } from "@/lib/favorites";
-import { filmMeta, formatDuration, formatRating } from "@/lib/films/format";
+import { SHELVES } from "@/lib/shelves";
+import { useWatchList, type WatchListId } from "@/lib/watchlists";
+import { filmMeta, formatDuration } from "@/lib/films/format";
 import type { Film } from "@/lib/films/types";
 import { filmPath } from "@/lib/site";
 import { ShareDialog } from "./ShareDialog";
@@ -32,6 +34,17 @@ export function FilmView({ film, similar }: FilmViewProps) {
   const toggleFav = () => favorites.toggle(film.id);
   const openShare = () => setShareOpen(true);
 
+  // «Надо посмотреть» / «Просмотрено»: фильм может быть только в одном из них
+  const watchlist = useWatchList("watchlist");
+  const watched = useWatchList("watched");
+  const lists: ReadonlyArray<{ id: WatchListId; on: boolean; toggle: () => void }> = [
+    { id: "watchlist", on: watchlist.has(film.id), toggle: () => watchlist.toggle(film.id) },
+    { id: "watched", on: watched.has(film.id), toggle: () => watched.toggle(film.id) },
+  ];
+  const listIcon = (id: WatchListId, on: boolean, size: number) => (
+    <Icon name={SHELVES[id].icon} size={size} filled={on && id !== "watched"} className={cx(on && styles.listOn)} />
+  );
+
   const tags = (
     <div className={styles.tags}>
       <span className={styles.tag}>{film.year}</span>
@@ -41,15 +54,6 @@ export function FilmView({ film, similar }: FilmViewProps) {
         </span>
       ))}
       {film.durationMin !== null && <span className={styles.tag}>{formatDuration(film.durationMin)}</span>}
-      {film.ageRating !== null && <span className={cx(styles.tag, styles.tagOutline)}>{film.ageRating}</span>}
-    </div>
-  );
-
-  const rating = film.rating !== null && (
-    <div className={styles.rating}>
-      <Icon name="star" size={18} className={styles.star} />
-      <span className={styles.ratingValue}>{formatRating(film.rating)}</span>
-      рейтинг зрителей
     </div>
   );
 
@@ -94,7 +98,6 @@ export function FilmView({ film, similar }: FilmViewProps) {
           <div className={styles.mIntro}>
             <h1 className={styles.mTitle}>{film.title}</h1>
             {tags}
-            {rating}
           </div>
 
           <div className={styles.mActions}>
@@ -117,6 +120,22 @@ export function FilmView({ film, similar }: FilmViewProps) {
             <button type="button" onClick={openShare} aria-label="Поделиться ссылкой на фильм" className={styles.mSquare}>
               <Icon name="share" size={22} />
             </button>
+          </div>
+
+          <div className={styles.mLists}>
+            {lists.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={l.toggle}
+                aria-pressed={l.on}
+                aria-label={l.on ? SHELVES[l.id].removeLabel : SHELVES[l.id].addLabel}
+                className={styles.mList}
+              >
+                {listIcon(l.id, l.on, 20)}
+                {l.on ? SHELVES[l.id].buttonOn : SHELVES[l.id].buttonOff}
+              </button>
+            ))}
           </div>
 
           {fav && (
@@ -181,7 +200,6 @@ export function FilmView({ film, similar }: FilmViewProps) {
               <div className={styles.dIntro}>
                 <h1 className={styles.dTitle}>{film.title}</h1>
                 {tags}
-                {rating}
               </div>
 
               {film.description && (
@@ -199,6 +217,19 @@ export function FilmView({ film, similar }: FilmViewProps) {
                     Смотреть трейлер
                   </>,
                 )}
+                {lists.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={l.toggle}
+                    aria-pressed={l.on}
+                    aria-label={l.on ? SHELVES[l.id].removeLabel : SHELVES[l.id].addLabel}
+                    className={styles.dButton}
+                  >
+                    {listIcon(l.id, l.on, 22)}
+                    {l.on ? SHELVES[l.id].buttonOn : SHELVES[l.id].buttonOff}
+                  </button>
+                ))}
                 <button type="button" onClick={toggleFav} aria-pressed={fav} className={styles.dButton}>
                   <Icon name="heart" size={22} filled={fav} className={cx(fav && styles.heartOn)} />
                   {fav ? "В избранном" : "В избранное"}

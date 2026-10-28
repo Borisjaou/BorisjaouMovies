@@ -4,20 +4,22 @@ import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { cx } from "@/lib/cx";
 import type { Film } from "@/lib/films/types";
+import { SHELF_ORDER, SHELVES, type ShelfId } from "@/lib/shelves";
 import { filmPosterVar } from "./poster";
 import styles from "./FilmCard.module.scss";
 import { PosterImage } from "./PosterImage";
 
 interface FilmCardProps {
   film: Film;
-  isFavorite: boolean;
-  onToggleFavorite: (film: Film) => void;
+  /** В каких списках фильм: «Надо посмотреть», «Просмотрено», «Избранное» */
+  shelves: Record<ShelfId, boolean>;
+  onToggle: (film: Film, shelf: ShelfId) => void;
   /** Кнопка «Поделиться» — только на ПК (DeskCatalog) */
   onShare: (film: Film) => void;
 }
 
 /** Карточка каталога: Catalog (мобила) / DeskCatalog (ПК) */
-export function FilmCard({ film, isFavorite, onToggleFavorite, onShare }: FilmCardProps) {
+export function FilmCard({ film, shelves, onToggle, onShare }: FilmCardProps) {
   const genre = film.genres[0];
 
   return (
@@ -29,8 +31,6 @@ export function FilmCard({ film, isFavorite, onToggleFavorite, onShare }: FilmCa
           <PosterImage url={film.posterUrl} />
         </div>
         <div className={styles.meta}>
-          <Icon name="star" size={14} className={styles.star} />
-          {film.rating !== null && <span className={styles.rating}>{film.rating.toFixed(1)}</span>}
           <span>
             {film.year} · {genre}
           </span>
@@ -46,15 +46,23 @@ export function FilmCard({ film, isFavorite, onToggleFavorite, onShare }: FilmCa
         >
           <Icon name="share" size={20} />
         </button>
-        <button
-          type="button"
-          onClick={() => onToggleFavorite(film)}
-          aria-pressed={isFavorite}
-          aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
-          className={cx(styles.glass, isFavorite && styles.favOn)}
-        >
-          <Icon name="heart" size={22} filled={isFavorite} />
-        </button>
+        {SHELF_ORDER.map((id) => {
+          const on = shelves[id];
+          const info = SHELVES[id];
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onToggle(film, id)}
+              aria-pressed={on}
+              aria-label={on ? info.removeLabel : info.addLabel}
+              className={cx(styles.glass, on && (id === "favorites" ? styles.favOn : styles.listOn))}
+            >
+              {/* У «Просмотрено» контур с галочкой: включённое состояние — цветом */}
+              <Icon name={info.icon} size={id === "favorites" ? 22 : 20} filled={on && id !== "watched"} />
+            </button>
+          );
+        })}
       </div>
     </div>
   );

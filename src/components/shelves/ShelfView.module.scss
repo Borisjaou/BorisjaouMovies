@@ -116,18 +116,6 @@
   color: var(--muted);
 }
 
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 400;
-}
-
-.star {
-  color: var(--star);
-}
-
 .actions {
   display: flex;
   flex-direction: column;
@@ -151,6 +139,11 @@
 
 .heart {
   color: var(--heart);
+}
+
+/* «Надо посмотреть» / «Просмотрено» */
+.listOn {
+  color: var(--accent);
 }
 
 /* ---------- Пусто ---------- */

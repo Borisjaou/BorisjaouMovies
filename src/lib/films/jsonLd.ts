@@ -16,7 +16,6 @@ export function filmJsonLd(film: Film): Record<string, unknown> {
   };
   if (film.originalTitle) data.alternateName = film.originalTitle;
   if (film.durationMin) data.duration = `PT${Math.floor(film.durationMin / 60)}H${film.durationMin % 60}M`;
-  if (film.ageRating) data.contentRating = film.ageRating;
   if (film.country) data.countryOfOrigin = { "@type": "Country", name: film.country };
   if (film.director) data.director = { "@type": "Person", name: film.director };
   if (film.cast.length) data.actor = film.cast.map((name) => ({ "@type": "Person", name }));

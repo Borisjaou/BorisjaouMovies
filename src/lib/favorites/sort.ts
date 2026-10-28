@@ -1,10 +1,9 @@
 import type { Film } from "@/lib/films/types";
 import type { FavoriteEntry } from "./types";
 
-/** Сортировка избранного (Favorites.dc.html): Недавние / Рейтинг / Год */
+/** Сортировка избранного (Favorites.dc.html): Недавние / Год (рейтинг убран с сайта) */
 export const FAVORITE_SORTS = [
   { id: "recent", label: "Недавние" },
-  { id: "rating", label: "Рейтинг" },
   { id: "year", label: "Год" },
 ] as const;
 export type FavoriteSortId = (typeof FAVORITE_SORTS)[number]["id"];
@@ -21,7 +20,7 @@ export function favoriteFilms(
     return film ? [{ film, addedAt: e.addedAt }] : [];
   });
   const key = (r: (typeof rows)[number]): number =>
-    sort === "recent" ? r.addedAt : sort === "rating" ? (r.film.rating ?? -Infinity) : r.film.year;
+    sort === "recent" ? r.addedAt : r.film.year;
   return rows
     .map((r, index) => ({ r, index }))
     .sort((a, b) => key(b.r) - key(a.r) || a.index - b.index)

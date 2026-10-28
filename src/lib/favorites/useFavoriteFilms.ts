@@ -4,13 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { favoriteFilmsAction } from "@/app/actions/films";
 import type { Film } from "@/lib/films/types";
 import { useFavorites } from "./context";
+import type { FavoritesApi } from "./types";
 
 /**
- * Фильмы из избранного (данные с сервера), с фильтрами и сортировкой каталога из `search`.
- * null — ещё загружается. При удалении из избранного фильм пропадает сразу, не дожидаясь ответа.
+ * Фильмы списка (избранное, «Надо посмотреть», «Просмотрено») — данные с сервера,
+ * с фильмами и сортировкой каталога из `search`.
+ * null — ещё загружается. При удалении из списка фильм пропадает сразу, не дожидаясь ответа.
  */
-export function useFavoriteFilms(search: string, enabled = true): Film[] | null {
-  const { ready, entries } = useFavorites();
+export function useListFilms(list: Pick<FavoritesApi, "ready" | "entries">, search: string, enabled = true): Film[] | null {
+  const { ready, entries } = list;
   const idsKey = useMemo(
     () =>
       entries
@@ -40,4 +42,9 @@ export function useFavoriteFilms(search: string, enabled = true): Film[] | null 
     const ids = new Set(entries.map((e) => e.filmId));
     return state.films.filter((f) => ids.has(f.id));
   }, [enabled, ready, state, key, entries]);
+}
+
+/** Фильмы из избранного */
+export function useFavoriteFilms(search: string, enabled = true): Film[] | null {
+  return useListFilms(useFavorites(), search, enabled);
 }

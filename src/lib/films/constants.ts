@@ -30,15 +30,6 @@ export const DECADES = [
 ] as const;
 export type DecadeId = (typeof DECADES)[number]["id"];
 
-/** Рейтинг зрителей: «Любой» = без ограничения */
-export const RATING_OPTIONS = [
-  { id: "any", label: "Любой", min: null },
-  { id: "6", label: "6+", min: 6 },
-  { id: "7", label: "7+", min: 7 },
-  { id: "8", label: "8+", min: 8 },
-] as const;
-export type RatingOptionId = (typeof RATING_OPTIONS)[number]["id"];
-
 /** Длительность: ≤ 90 · 91–120 · > 120 минут */
 export const DURATION_OPTIONS = [
   { id: "short", label: "До 90 мин", min: null, max: 90 },
@@ -47,10 +38,6 @@ export const DURATION_OPTIONS = [
 ] as const;
 export type DurationOptionId = (typeof DURATION_OPTIONS)[number]["id"];
 
-/** Возрастной рейтинг (Filters, AdminAdd) */
-export const AGE_RATINGS = ["0+", "6+", "12+", "16+", "18+"] as const;
-export type AgeRating = (typeof AGE_RATINGS)[number];
-
 /** Страны из select в Filters / AdminAdd (без «Все страны» / «Не указана») */
 export const COUNTRIES = ["Россия", "США", "Франция", "Южная Корея", "Япония"] as const;
 export type Country = (typeof COUNTRIES)[number];
@@ -58,7 +45,6 @@ export type Country = (typeof COUNTRIES)[number];
 /** Сортировка каталога: подписи из Catalog / DeskCatalog */
 export const SORT_OPTIONS = [
   { id: "popular", label: "Популярные" },
-  { id: "rating", label: "По рейтингу" },
   { id: "new", label: "Новые" },
 ] as const;
 export type SortId = (typeof SORT_OPTIONS)[number]["id"];

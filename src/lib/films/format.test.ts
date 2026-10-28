@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FILMS } from "./data";
-import { filmMeta, formatDuration, formatRating } from "./format";
+import { filmMeta, formatDuration } from "./format";
 
 describe("formatDuration", () => {
   it("как на странице фильма: 128 → «2 ч 08 мин»", () => {
@@ -15,14 +15,8 @@ describe("formatDuration", () => {
 });
 
 describe("filmMeta", () => {
-  it("год · жанр · рейтинг", () => {
+  it("год · жанр (рейтинг убран с сайта)", () => {
     const orbita = FILMS.find((f) => f.slug === "orbita-9");
-    expect(orbita && filmMeta(orbita)).toBe("2024 · Фантастика · 8.4");
-    expect(formatRating(8)).toBe("8.0");
-  });
-
-  it("без рейтинга — без третьей части", () => {
-    const draft = FILMS.find((f) => f.status === "draft");
-    expect(draft && filmMeta(draft)).toBe("2026 · Драма");
+    expect(orbita && filmMeta(orbita)).toBe("2024 · Фантастика");
   });
 });

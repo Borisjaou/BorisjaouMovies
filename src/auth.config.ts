@@ -10,7 +10,7 @@ function toRole(value: unknown): Role {
  * её использует proxy.ts, а полная — src/auth.ts.
  */
 export const authConfig = {
-  pages: { signIn: "/login" },
+  pages: { signIn: "/login", error: "/login" },
   session: { strategy: "jwt" },
   trustHost: true,
   providers: [],

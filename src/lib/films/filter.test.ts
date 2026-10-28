@@ -54,22 +54,11 @@ describe("getFilms — сортировка", () => {
     ]);
   });
 
-  it("По рейтингу", async () => {
-    expect(await titles({ sort: "rating" })).toEqual([
-      "Орбита 9", "Тихий берег", "Бумажный кит", "Код тишины", "Звёздная пыль",
-      "Северный ветер", "Город в тумане", "Лимонное лето", "Ночная смена", "Весёлый переполох",
-    ]);
-  });
-
   it("Новые — при равном годе сохраняется порядок данных", async () => {
     expect(await titles({ sort: "new" })).toEqual([
       "Тихий берег", "Лимонное лето", "Орбита 9", "Северный ветер", "Код тишины",
       "Бумажный кит", "Ночная смена", "Город в тумане", "Звёздная пыль", "Весёлый переполох",
     ]);
-  });
-
-  it("фильм без рейтинга уходит в конец при сортировке по рейтингу", async () => {
-    expect((await titles({ status: "all", sort: "rating" })).at(-1)).toBe("Без названия (черновик)");
   });
 });
 
@@ -122,19 +111,7 @@ describe("getFilms — годы", () => {
   });
 });
 
-describe("getFilms — рейтинг, длительность, возраст, страна", () => {
-  it("Любой / 7+ / 8+", async () => {
-    expect(await count({ rating: "any" })).toBe(10);
-    expect(await count({ rating: "7" })).toBe(8);
-    expect(await titles({ rating: "8" })).toEqual(["Орбита 9", "Тихий берег", "Бумажный кит"]);
-  });
-
-  it("граница рейтинга включается", async () => {
-    await addFilms([{ rating: 6, popularity: -1 }, { rating: 5.9, popularity: -2 }]);
-    expect((await repo.getFilms({ rating: "6" })).items.some((f) => f.rating === 6)).toBe(true);
-    expect((await repo.getFilms({ rating: "6" })).items.some((f) => f.rating === 5.9)).toBe(false);
-  });
-
+describe("getFilms — длительность, страна", () => {
   it("длительность: ≤ 90 · 91–120 · > 120", async () => {
     await addFilms([90, 91, 120, 121].map((d) => ({ durationMin: d, popularity: -d })));
     const mins = async (duration: FilmFilters["duration"]) =>
@@ -144,16 +121,14 @@ describe("getFilms — рейтинг, длительность, возраст,
     expect(await mins("long")).toEqual([121, 128]);
   });
 
-  it("без длительности / возраста / страны фильм не проходит фильтр", async () => {
+  it("без длительности / страны фильм не проходит фильтр", async () => {
     expect(await titles({ duration: "long" })).toEqual(["Орбита 9"]);
-    expect(await titles({ ages: ["16+"] })).toEqual(["Орбита 9"]);
-    expect(await count({ ages: ["0+", "6+"] })).toBe(0);
     await addFilms([{ country: "США" }, { country: "Франция" }]);
     expect((await repo.getFilms({ country: "США" })).items.map((f) => f.country)).toEqual(["США"]);
   });
 
   it("фильтры складываются через И", async () => {
-    expect(await titles({ genres: ["Фантастика"], rating: "8" })).toEqual(["Орбита 9"]);
+    expect(await titles({ genres: ["Фантастика"], duration: "long" })).toEqual(["Орбита 9"]);
     expect(await count({ genres: ["Фантастика"], decades: ["2020s"], duration: "short" })).toBe(0);
   });
 });
@@ -180,7 +155,7 @@ describe("getFilms — пагинация по 20 и выборка по id", ()
 describe("getFilmBySlug / getNewFilms / getSimilarFilms", () => {
   it("getFilmBySlug: опубликованный, черновик — только с includeDrafts, неизвестный", async () => {
     const orbita = await repo.getFilmBySlug("orbita-9");
-    expect(orbita).toMatchObject({ title: "Орбита 9", durationMin: 128, ageRating: "16+", cast: ["[Актёр 1]", "[Актёр 2]", "[Актёр 3]"] });
+    expect(orbita).toMatchObject({ title: "Орбита 9", durationMin: 128, cast: ["[Актёр 1]", "[Актёр 2]", "[Актёр 3]"] });
     expect(await repo.getFilmBySlug("bez-nazvaniya-chernovik")).toBeNull();
     expect((await repo.getFilmBySlug("bez-nazvaniya-chernovik", { includeDrafts: true }))?.status).toBe("draft");
     expect(await repo.getFilmBySlug("net-takogo")).toBeNull();
@@ -191,11 +166,11 @@ describe("getFilmBySlug / getNewFilms / getSimilarFilms", () => {
     expect((await repo.getNewFilms(3)).map((f) => f.title)).toEqual(["Тихий берег", "Орбита 9", "Лимонное лето"]);
   });
 
-  it("getSimilarFilms: общие жанры, затем рейтинг; без самого фильма и черновиков", async () => {
+  it("getSimilarFilms: общие жанры, затем популярность; без самого фильма и черновиков", async () => {
     const orbita = await repo.getFilmBySlug("orbita-9");
     if (!orbita) throw new Error("нет данных");
     expect((await repo.getSimilarFilms(orbita)).map((f) => f.title)).toEqual([
-      "Тихий берег", "Звёздная пыль", "Город в тумане", "Бумажный кит", "Код тишины",
+      "Тихий берег", "Город в тумане", "Звёздная пыль", "Лимонное лето", "Код тишины",
     ]);
     expect(await repo.getSimilarFilms(orbita, 2)).toHaveLength(2);
   });

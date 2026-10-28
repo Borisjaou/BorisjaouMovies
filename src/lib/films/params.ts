@@ -1,23 +1,20 @@
 /**
- * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&rating=…&duration=…&age=…&country=…&sort=…&fav=1
+ * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&duration=…&country=…&sort=…&fav=1 | &list=watchlist
  * Многозначные параметры повторяются: ?genre=Драма&genre=Комедия
  */
 import {
-  AGE_RATINGS,
   COUNTRIES,
   DECADES,
   DURATION_OPTIONS,
   GENRES,
-  RATING_OPTIONS,
   SORT_OPTIONS,
-  type AgeRating,
   type Country,
   type DecadeId,
   type DurationOptionId,
   type Genre,
-  type RatingOptionId,
   type SortId,
 } from "./constants";
+import { WATCH_LISTS, type WatchListId } from "@/lib/watchlists/types";
 import type { FilmFilters } from "./types";
 
 export type SearchParamsRecord = Record<string, string | string[] | undefined>;
@@ -28,21 +25,31 @@ export interface CatalogQuery {
   decades: DecadeId[];
   yearFrom?: number;
   yearTo?: number;
-  /** undefined — «Любой» */
-  rating?: Exclude<RatingOptionId, "any">;
   duration?: DurationOptionId;
-  ages: AgeRating[];
   country?: Country;
   sort: SortId;
   /** Режим «Избранное» на ПК */
   fav: boolean;
+  /** Режим «Надо посмотреть» / «Просмотрено» на ПК (не вместе с fav) */
+  list?: WatchListId;
+}
+
+/** Раздел-список каталога на ПК: избранное или один из списков просмотра */
+export type ShelfId = "favorites" | WatchListId;
+
+export function shelfOf(query: CatalogQuery): ShelfId | null {
+  return query.fav ? "favorites" : (query.list ?? null);
+}
+
+/** Тот же запрос, но в режиме раздела (null — обычный каталог) */
+export function withShelf(query: CatalogQuery, shelf: ShelfId | null): CatalogQuery {
+  return { ...query, fav: shelf === "favorites", list: shelf === "favorites" || shelf === null ? undefined : shelf };
 }
 
 export const EMPTY_QUERY: CatalogQuery = {
   q: "",
   genres: [],
   decades: [],
-  ages: [],
   sort: "popular",
   fav: false,
 };
@@ -53,12 +60,11 @@ const KEYS = {
   decade: "decade",
   from: "from",
   to: "to",
-  rating: "rating",
   duration: "duration",
-  age: "age",
   country: "country",
   sort: "sort",
   fav: "fav",
+  list: "list",
 } as const;
 
 function all(sp: SearchParamsRecord, key: string): string[] {
@@ -84,11 +90,8 @@ function year(value: string | undefined): number | undefined {
   return Number(value);
 }
 
-const RATING_IDS = RATING_OPTIONS.map((o) => o.id).filter(
-  (id): id is Exclude<RatingOptionId, "any"> => id !== "any",
-);
-
 export function parseCatalogQuery(sp: SearchParamsRecord): CatalogQuery {
+  const fav = first(sp, KEYS.fav) === "1";
   return {
     q: (first(sp, KEYS.q) ?? "").slice(0, 100),
     genres: manyOf(GENRES, all(sp, KEYS.genre)),
@@ -98,19 +101,18 @@ export function parseCatalogQuery(sp: SearchParamsRecord): CatalogQuery {
     ),
     yearFrom: year(first(sp, KEYS.from)),
     yearTo: year(first(sp, KEYS.to)),
-    rating: oneOf(RATING_IDS, first(sp, KEYS.rating)),
     duration: oneOf(
       DURATION_OPTIONS.map((d) => d.id),
       first(sp, KEYS.duration),
     ),
-    ages: manyOf(AGE_RATINGS, all(sp, KEYS.age)),
     country: oneOf(COUNTRIES, first(sp, KEYS.country)),
     sort:
       oneOf(
         SORT_OPTIONS.map((s) => s.id),
         first(sp, KEYS.sort),
       ) ?? "popular",
-    fav: first(sp, KEYS.fav) === "1",
+    fav,
+    list: fav ? undefined : oneOf(WATCH_LISTS, first(sp, KEYS.list)),
   };
 }
 
@@ -132,12 +134,11 @@ export function stringifyCatalogQuery(query: CatalogQuery): string {
   query.decades.forEach((d) => p.append(KEYS.decade, d));
   if (query.yearFrom !== undefined) p.set(KEYS.from, String(query.yearFrom));
   if (query.yearTo !== undefined) p.set(KEYS.to, String(query.yearTo));
-  if (query.rating) p.set(KEYS.rating, query.rating);
   if (query.duration) p.set(KEYS.duration, query.duration);
-  query.ages.forEach((a) => p.append(KEYS.age, a));
   if (query.country) p.set(KEYS.country, query.country);
   if (query.sort !== "popular") p.set(KEYS.sort, query.sort);
   if (query.fav) p.set(KEYS.fav, "1");
+  else if (query.list) p.set(KEYS.list, query.list);
   return p.toString();
 }
 
@@ -153,9 +154,7 @@ export function toFilmFilters(query: CatalogQuery): FilmFilters {
     decades: query.decades,
     yearFrom: query.yearFrom,
     yearTo: query.yearTo,
-    rating: query.rating,
     duration: query.duration,
-    ages: query.ages,
     country: query.country,
     sort: query.sort,
   };
