@@ -166,7 +166,10 @@ DATABASE_URL=postgresql://… npm run db:seed    # один раз: фильмы
    | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | по желанию; redirect URI: `https://<домен>/api/auth/callback/google` |
    | `KINOPOISK_API_KEY` | автозаполнение по ссылке Кинопоиска: ключ с kinopoiskapiunofficial.tech |
    | `TMDB_API_KEY` | автозаполнение по ссылке TMDB / IMDb: ключ API или токен доступа на чтение с themoviedb.org |
+   | `CRON_SECRET` | по желанию: случайная строка; тогда `/api/keepalive` отвечает только Vercel Cron |
 
 6. После первого деплоя: зарегистрироваться на `/login?mode=register` с почтой из `ADMIN_EMAILS` — роль admin выдастся сама. Другим почтам регистрация закрыта.
+
+Ежедневный запрос к базе (`vercel.json` → `crons`, `/api/keepalive`, 03:00 UTC) не даёт бесплатному проекту Supabase уйти на паузу после недели без активности.
 
 Почему не `local` на Vercel: файловая система функций только для чтения и не сохраняется между запусками.
