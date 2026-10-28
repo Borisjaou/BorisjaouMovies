@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fitDescription, IMPORT_MESSAGES, mapGenres, type FetchFn } from "./common";
+import { cleanKey, fitDescription, IMPORT_MESSAGES, mapGenres, type FetchFn } from "./common";
 import { importFilm, parseFilmLink } from "./index";
 
 /** Подменный fetch: ответы по началу адреса, записывает запросы */
@@ -51,6 +51,16 @@ describe("mapGenres / fitDescription", () => {
     expect(out.length).toBeLessThanOrEqual(100);
     expect(out.endsWith(".")).toBe(true);
     expect(fitDescription("  коротко  ")).toBe("коротко");
+  });
+});
+
+describe("cleanKey", () => {
+  it("убирает пробелы, кавычки, Bearer и имя переменной", () => {
+    expect(cleanKey("  eyJabc\n")).toBe("eyJabc");
+    expect(cleanKey('"abc123"')).toBe("abc123");
+    expect(cleanKey("Bearer eyJabc")).toBe("eyJabc");
+    expect(cleanKey("TMDB_API_KEY=abc123")).toBe("abc123");
+    expect(cleanKey(undefined)).toBe("");
   });
 });
 
@@ -132,7 +142,7 @@ describe("importFilm", () => {
       },
       calls,
     );
-    const film = await importFilm("https://www.imdb.com/title/tt0133093/", { tmdb: "eyJtoken" }, fetchFn);
+    const film = await importFilm("https://www.imdb.com/title/tt0133093/", { tmdb: " Bearer eyJtoken\n" }, fetchFn);
     expect(film).toMatchObject({
       title: "Матрица",
       originalTitle: "The Matrix",
@@ -155,6 +165,10 @@ describe("importFilm", () => {
     await expect(importFilm("https://example.com/", { tmdb: "k" })).rejects.toThrow(IMPORT_MESSAGES.badLink);
     await expect(importFilm("https://www.themoviedb.org/movie/1", { tmdb: "k" }, fakeFetch({}))).rejects.toThrow(
       IMPORT_MESSAGES.notFound,
+    );
+    const denied: FetchFn = async () => new Response("", { status: 401 });
+    await expect(importFilm("https://www.kinopoisk.ru/film/1/", { kinopoisk: "bad" }, denied)).rejects.toThrow(
+      IMPORT_MESSAGES.badKey.kinopoisk,
     );
   });
 });

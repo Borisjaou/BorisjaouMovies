@@ -1,4 +1,4 @@
-import { IMPORT_MESSAGES, ImportError, type FetchFn, type ImportedFilm } from "./common";
+import { cleanKey, IMPORT_MESSAGES, ImportError, type FetchFn, type ImportedFilm } from "./common";
 import { importFromKinopoisk } from "./kinopoisk";
 import { parseFilmLink } from "./link";
 import { findByImdb, importFromTmdb } from "./tmdb";
@@ -17,14 +17,16 @@ export interface ImportKeys {
  */
 export async function importFilm(link: string, keys: ImportKeys, fetchFn: FetchFn = fetch): Promise<ImportedFilm> {
   const parsed = parseFilmLink(link);
+  const kinopoiskKey = cleanKey(keys.kinopoisk);
+  const tmdbKey = cleanKey(keys.tmdb);
   if (!parsed) throw new ImportError(IMPORT_MESSAGES.badLink);
 
   if (parsed.source === "kinopoisk") {
-    if (!keys.kinopoisk) throw new ImportError(IMPORT_MESSAGES.noKinopoiskKey);
-    return importFromKinopoisk(parsed.id, keys.kinopoisk, fetchFn);
+    if (!kinopoiskKey) throw new ImportError(IMPORT_MESSAGES.noKinopoiskKey);
+    return importFromKinopoisk(parsed.id, kinopoiskKey, fetchFn);
   }
 
-  if (!keys.tmdb) throw new ImportError(IMPORT_MESSAGES.noTmdbKey);
-  const target = parsed.source === "imdb" ? await findByImdb(parsed.id, keys.tmdb, fetchFn) : parsed;
-  return importFromTmdb(target.kind, target.id, keys.tmdb, fetchFn);
+  if (!tmdbKey) throw new ImportError(IMPORT_MESSAGES.noTmdbKey);
+  const target = parsed.source === "imdb" ? await findByImdb(parsed.id, tmdbKey, fetchFn) : parsed;
+  return importFromTmdb(target.kind, target.id, tmdbKey, fetchFn);
 }

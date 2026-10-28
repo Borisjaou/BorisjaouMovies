@@ -81,7 +81,7 @@ export async function findByImdb(
 ): Promise<{ kind: "movie" | "tv"; id: string }> {
   const a = auth(apiKey);
   const found = findSchema.safeParse(
-    await getJson(fetchFn, `${API}/find/${imdbId}?external_source=imdb_id${a.query}`, a.headers),
+    await getJson(fetchFn, `${API}/find/${imdbId}?external_source=imdb_id${a.query}`, a.headers, "tmdb"),
   ).data;
   const movie = found?.movie_results?.[0];
   if (movie) return { kind: "movie", id: String(movie.id) };
@@ -99,7 +99,7 @@ export async function importFromTmdb(
   const a = auth(apiKey);
   const url =
     `${API}/${kind}/${id}?language=ru-RU&append_to_response=credits,videos&include_video_language=ru,en${a.query}`;
-  const parsed = detailsSchema.safeParse(await getJson(fetchFn, url, a.headers));
+  const parsed = detailsSchema.safeParse(await getJson(fetchFn, url, a.headers, "tmdb"));
   if (!parsed.success) throw new ImportError(IMPORT_MESSAGES.failed);
   const d = parsed.data;
 

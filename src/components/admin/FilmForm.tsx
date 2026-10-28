@@ -121,7 +121,7 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
       try {
         result = await importFilmAction(importLink);
       } catch {
-        setImportError("Не удалось получить данные. Проверьте соединение и попробуйте ещё раз");
+        setImportError("Не удалось получить данные. Обновите страницу и попробуйте ещё раз");
         return;
       }
       if (!result.ok) {

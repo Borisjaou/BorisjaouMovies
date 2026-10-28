@@ -44,14 +44,14 @@ const videosSchema = z.object({
 
 export async function importFromKinopoisk(id: string, apiKey: string, fetchFn: FetchFn): Promise<ImportedFilm> {
   const headers = { "X-API-KEY": apiKey };
-  const film = filmSchema.safeParse(await getJson(fetchFn, `${API}/api/v2.2/films/${id}`, headers));
+  const film = filmSchema.safeParse(await getJson(fetchFn, `${API}/api/v2.2/films/${id}`, headers, "kinopoisk"));
   if (!film.success) throw new ImportError(IMPORT_MESSAGES.failed);
   const f = film.data;
 
   // Съёмочная группа и трейлер не обязательны: без них форма всё равно заполнится
   const [staffRaw, videosRaw] = await Promise.all([
-    getJson(fetchFn, `${API}/api/v1/staff?filmId=${id}`, headers).catch(() => []),
-    getJson(fetchFn, `${API}/api/v2.2/films/${id}/videos`, headers).catch(() => ({ items: [] })),
+    getJson(fetchFn, `${API}/api/v1/staff?filmId=${id}`, headers, "kinopoisk").catch(() => []),
+    getJson(fetchFn, `${API}/api/v2.2/films/${id}/videos`, headers, "kinopoisk").catch(() => ({ items: [] })),
   ]);
   const staff = staffSchema.safeParse(staffRaw).data ?? [];
   const videos = videosSchema.safeParse(videosRaw).data?.items ?? [];

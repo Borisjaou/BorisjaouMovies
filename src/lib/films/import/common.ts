@@ -29,7 +29,10 @@ export const IMPORT_MESSAGES = {
   noKinopoiskKey: "Не задан ключ Кинопоиска (KINOPOISK_API_KEY в настройках Vercel)",
   noTmdbKey: "Не задан ключ TMDB (TMDB_API_KEY в настройках Vercel)",
   notFound: "Фильм не найден у источника",
-  badKey: "Источник не принял ключ API — проверьте его в настройках Vercel",
+  badKey: {
+    kinopoisk: "Кинопоиск не принял ключ — проверьте KINOPOISK_API_KEY в настройках Vercel",
+    tmdb: "TMDB не принял ключ — проверьте TMDB_API_KEY в настройках Vercel",
+  },
   limit: "Превышен лимит запросов к источнику — попробуйте позже",
   failed: "Не удалось получить данные. Попробуйте ещё раз",
 } as const;
@@ -108,15 +111,35 @@ export function youtubeUrl(url: string | null | undefined): string {
   return /^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(url) ? url : "";
 }
 
+/**
+ * Ключ из настроек без случайного мусора при копировании:
+ * пробелы и переносы, кавычки, «Bearer », «ИМЯ_ПЕРЕМЕННОЙ=».
+ */
+export function cleanKey(raw: string | undefined): string {
+  return (raw ?? "")
+    .trim()
+    .replace(/^[A-Z_]+=/, "")
+    .replace(/^["']|["']$/g, "")
+    .replace(/^Bearer\s+/i, "")
+    .trim();
+}
+
 /** Ответ API → JSON; понятные ошибки на 401/403/404/429 */
-export async function getJson(fetchFn: FetchFn, url: string, headers: Record<string, string>): Promise<unknown> {
+export async function getJson(
+  fetchFn: FetchFn,
+  url: string,
+  headers: Record<string, string>,
+  source: ImportedFilm["source"],
+): Promise<unknown> {
   let res: Response;
   try {
     res = await fetchFn(url, { headers: { Accept: "application/json", ...headers } });
   } catch {
     throw new ImportError(IMPORT_MESSAGES.failed);
   }
-  if (res.status === 401 || res.status === 403) throw new ImportError(IMPORT_MESSAGES.badKey);
+  // В логи Vercel — только источник и код ответа (без адреса: в нём может быть ключ)
+  if (!res.ok) console.warn(`film import: ${source} HTTP ${res.status}`);
+  if (res.status === 401 || res.status === 403) throw new ImportError(IMPORT_MESSAGES.badKey[source]);
   if (res.status === 404 || res.status === 400) throw new ImportError(IMPORT_MESSAGES.notFound);
   if (res.status === 402 || res.status === 429) throw new ImportError(IMPORT_MESSAGES.limit);
   if (!res.ok) throw new ImportError(IMPORT_MESSAGES.failed);
