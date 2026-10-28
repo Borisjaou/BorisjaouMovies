@@ -16,6 +16,7 @@ import { catalogHref, EMPTY_QUERY, withShelf } from "@/lib/films/params";
 import { SHELVES, shelfToast, type ShelfId } from "@/lib/shelves";
 import { useShelf } from "@/lib/useShelf";
 import { useToast } from "@/lib/useToast";
+import { groupByVerdict } from "@/lib/films/verdictGroups";
 import styles from "./ShelfView.module.scss";
 import { PosterImage } from "@/components/films/PosterImage";
 
@@ -42,6 +43,8 @@ export function ShelfView({ shelf }: { shelf: ShelfId }) {
   const items = favoriteFilms(films ?? [], list.entries, sort);
   const hasItems = items.length > 0;
   const empty = loaded && !hasItems;
+  // «Просмотрено» — группами по ИМХО: «Понравились», «Не понравились», «Без оценки»
+  const groups = shelf === "watched" ? groupByVerdict(items) : null;
 
   const share = async (film: Film) => {
     const url = filmUrl(film.slug);
@@ -58,6 +61,45 @@ export function ShelfView({ shelf }: { shelf: ShelfId }) {
     list.remove(film.id);
     toast.show(shelfToast(shelf, film.title, false));
   };
+
+  const item = (film: Film) => (
+    <li key={film.id} className={styles.item}>
+      <div className={styles.itemRow}>
+        <Link href={filmPath(film.slug)} className={styles.link}>
+          <div className={styles.poster} style={{ background: filmPosterVar(film.posterColor) }}>
+            <div aria-hidden="true" className={styles.posterShape} />
+            <PosterImage url={film.posterUrl} />
+          </div>
+          <div className={styles.text}>
+            <div className={styles.name}>{film.title}</div>
+            <div className={styles.meta}>
+              {film.year} · {film.genres[0]}
+            </div>
+          </div>
+        </Link>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={() => share(film)}
+            aria-label={`Поделиться: ${film.title}`}
+            className={styles.action}
+          >
+            <Icon name="share" size={20} />
+          </button>
+          <button
+            type="button"
+            onClick={() => remove(film)}
+            aria-label={`${info.removeLabel}: ${film.title}`}
+            className={`${styles.action} ${shelf === "favorites" ? styles.heart : styles.listOn}`}
+          >
+            <Icon name={info.icon} size={22} filled={shelf !== "watched"} />
+          </button>
+        </div>
+      </div>
+      {/* «Просмотрено»: ИМХО автора под фильмом */}
+      {shelf === "watched" && film.imho && <p className={styles.note}>{film.imho}</p>}
+    </li>
+  );
 
   return (
     <div className={styles.page}>
@@ -82,44 +124,21 @@ export function ShelfView({ shelf }: { shelf: ShelfId }) {
       </header>
 
       <main className={styles.main}>
-        {hasItems && (
-          <ul className={styles.list}>
-            {items.map((film) => (
-              <li key={film.id} className={styles.item}>
-                <Link href={filmPath(film.slug)} className={styles.link}>
-                  <div className={styles.poster} style={{ background: filmPosterVar(film.posterColor) }}>
-                    <div aria-hidden="true" className={styles.posterShape} />
-                    <PosterImage url={film.posterUrl} />
-                  </div>
-                  <div className={styles.text}>
-                    <div className={styles.name}>{film.title}</div>
-                    <div className={styles.meta}>
-                      {film.year} · {film.genres[0]}
-                    </div>
-                  </div>
-                </Link>
-                <div className={styles.actions}>
-                  <button
-                    type="button"
-                    onClick={() => share(film)}
-                    aria-label={`Поделиться: ${film.title}`}
-                    className={styles.action}
-                  >
-                    <Icon name="share" size={20} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => remove(film)}
-                    aria-label={`${info.removeLabel}: ${film.title}`}
-                    className={`${styles.action} ${shelf === "favorites" ? styles.heart : styles.listOn}`}
-                  >
-                    <Icon name={info.icon} size={22} filled={shelf !== "watched"} />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        {hasItems &&
+          (groups ? (
+            groups.map((g) => (
+              <section key={g.id} aria-labelledby={`m-group-${g.id}`} className={styles.group}>
+                <h2 id={`m-group-${g.id}`} className={styles.groupTitle}>
+                  {g.icon && <Icon name={g.icon} size={20} />}
+                  {g.title}
+                  <span className={styles.groupCount}>{g.films.length}</span>
+                </h2>
+                <ul className={styles.list}>{g.films.map(item)}</ul>
+              </section>
+            ))
+          ) : (
+            <ul className={styles.list}>{items.map(item)}</ul>
+          ))}
 
         {empty && (
           <div className={styles.empty}>

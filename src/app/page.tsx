@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CatalogView } from "@/components/catalog/CatalogView";
 import { getViewer } from "@/lib/auth";
 import { getFilms, getNewFilms } from "@/lib/films";
-import { parseCatalogQuery, toFilmFilters, type SearchParamsRecord } from "@/lib/films/params";
+import { parseCatalogQuery, shelfOf, toFilmFilters, type SearchParamsRecord } from "@/lib/films/params";
 import type { FilmPage } from "@/lib/films/types";
 
 type Props = { searchParams: Promise<SearchParamsRecord> };
@@ -21,8 +21,8 @@ const EMPTY_PAGE: FilmPage = { items: [], total: 0, page: 1, pageSize: 20, hasMo
 export default async function CatalogPage({ searchParams }: Props) {
   const query = parseCatalogQuery(await searchParams);
   const [page, freshFilms, viewer] = await Promise.all([
-    // В режиме «Избранное» список грузится на клиенте по id из избранного
-    query.fav ? Promise.resolve(EMPTY_PAGE) : getFilms(toFilmFilters(query)),
+    // В разделах-списках (избранное, «Надо посмотреть», «Просмотрено») фильмы грузятся на клиенте по id
+    shelfOf(query) ? Promise.resolve(EMPTY_PAGE) : getFilms(toFilmFilters(query)),
     getNewFilms(),
     getViewer(),
   ]);

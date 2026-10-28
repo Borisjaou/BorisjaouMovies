@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { FilmInput } from "./filmForm";
 import { FILM_INCLUDE, filmSearchText, toFilm } from "./mapper";
-import type { Film, FilmStatus, PosterColor, PosterShape } from "./types";
+import type { Film, FilmStatus, PosterColor, PosterShape, Verdict } from "./types";
 
 /** Цвет и фигура постера для нового фильма — стабильно по slug (одинаково при каждом показе) */
 export function posterLookFor(slug: string): { posterColor: PosterColor; posterShape: PosterShape } {
@@ -91,7 +91,18 @@ export function createAdminFilmsRepository(db: PrismaClient) {
     return toFilm(row);
   }
 
-  return { listAll, getById, isSlugTaken, create, update };
+  /** ИМХО автора: оценка и комментарий. Пустое ИМХО — без даты */
+  async function setImho(id: number, value: { verdict: Verdict | null; imho: string }): Promise<Film> {
+    const empty = value.verdict === null && value.imho === "";
+    const row = await db.film.update({
+      where: { id },
+      data: { verdict: value.verdict, imho: value.imho, imhoAt: empty ? null : new Date() },
+      include: FILM_INCLUDE,
+    });
+    return toFilm(row);
+  }
+
+  return { listAll, getById, isSlugTaken, create, update, setImho };
 }
 
 export type AdminFilmsRepository = ReturnType<typeof createAdminFilmsRepository>;

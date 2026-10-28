@@ -2,6 +2,10 @@ import type { DecadeId, DurationOptionId, Genre, SortId } from "./constants";
 
 export type FilmStatus = "published" | "draft";
 
+/** ИМХО автора: понравился / не понравился. «Не понравился» — фильм в «Яме», в каталоге его нет */
+export const VERDICTS = ["liked", "disliked"] as const;
+export type Verdict = (typeof VERDICTS)[number];
+
 /** Номер цвета постера 1–6 = posters[0..5] в THEMES (--poster-0 … --poster-5) */
 export type PosterColor = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -34,6 +38,11 @@ export interface Film {
   status: FilmStatus;
   /** Для сортировки «Популярные» (pop в эталоне) */
   popularity: number;
+  /** ИМХО автора — видно всем */
+  verdict: Verdict | null;
+  imho: string;
+  /** Когда ИМХО менялось (ISO) */
+  imhoAt: string | null;
 }
 
 export interface FilmFilters {
@@ -52,8 +61,10 @@ export interface FilmFilters {
   sort?: SortId;
   /** По умолчанию только опубликованные; "all" — для админки */
   status?: FilmStatus | "all";
-  /** Только эти фильмы (избранное) */
+  /** Только эти фильмы (избранное и списки зрителя): тогда «Яма» не скрывается */
   ids?: readonly number[];
+  /** Только «Яма» (ИМХО «не понравился»). По умолчанию такие фильмы в каталоге не показываются */
+  pit?: boolean;
 }
 
 /** Страница результатов каталога */

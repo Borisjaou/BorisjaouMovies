@@ -25,6 +25,9 @@ export const FILMS: readonly Film[] = [
     isNew: true,
     status: "published",
     popularity: 9,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 2,
@@ -44,6 +47,9 @@ export const FILMS: readonly Film[] = [
     isNew: true,
     status: "published",
     popularity: 10,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 3,
@@ -62,6 +68,9 @@ export const FILMS: readonly Film[] = [
     isNew: true,
     status: "published",
     popularity: 8,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 4,
@@ -80,6 +89,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 7,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 5,
@@ -98,6 +110,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 6,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 6,
@@ -116,6 +131,9 @@ export const FILMS: readonly Film[] = [
     isNew: true,
     status: "published",
     popularity: 5,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 7,
@@ -134,6 +152,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 4,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 8,
@@ -152,6 +173,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 3,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 9,
@@ -170,6 +194,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 2,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     id: 10,
@@ -188,6 +215,9 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "published",
     popularity: 1,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
   {
     // AdminFilms: { title: 'Без названия (черновик)', year: 2026, genre: 'Драма', pub: false, c: 5 }
@@ -207,5 +237,8 @@ export const FILMS: readonly Film[] = [
     isNew: false,
     status: "draft",
     popularity: 0,
+    verdict: null,
+    imho: "",
+    imhoAt: null,
   },
 ];

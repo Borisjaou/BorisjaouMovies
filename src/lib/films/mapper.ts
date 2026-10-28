@@ -1,6 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { GENRES } from "./constants";
-import type { Film, FilmStatus, PosterColor, PosterShape } from "./types";
+import { VERDICTS, type Film, type FilmStatus, type PosterColor, type PosterShape } from "./types";
 
 export const FILM_INCLUDE = {
   genres: { orderBy: { position: "asc" } },
@@ -33,6 +33,9 @@ export function toFilm(row: FilmRow): Film {
     isNew: row.isNew,
     status: (row.status === "published" ? "published" : "draft") satisfies FilmStatus,
     popularity: row.popularity,
+    verdict: VERDICTS.find((v) => v === row.verdict) ?? null,
+    imho: row.imho,
+    imhoAt: row.imhoAt ? row.imhoAt.toISOString() : null,
   };
 }
 
@@ -42,7 +45,9 @@ export function filmSearchText(film: Pick<Film, "title" | "originalTitle" | "dir
 }
 
 /** Доменный Film → данные для записи (без id и жанров) */
-export function toFilmData(film: Omit<Film, "id">): Omit<Prisma.FilmCreateInput, "genres" | "favorites"> {
+export function toFilmData(
+  film: Omit<Film, "id">,
+): Omit<Prisma.FilmCreateInput, "genres" | "favorites" | "watchItems"> {
   return {
     slug: film.slug,
     title: film.title,
@@ -61,6 +66,9 @@ export function toFilmData(film: Omit<Film, "id">): Omit<Prisma.FilmCreateInput,
     isNew: film.isNew,
     status: film.status,
     popularity: film.popularity,
+    verdict: film.verdict,
+    imho: film.imho,
+    imhoAt: film.imhoAt ? new Date(film.imhoAt) : null,
     searchText: filmSearchText(film),
   };
 }

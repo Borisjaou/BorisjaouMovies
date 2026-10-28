@@ -16,10 +16,12 @@ test.describe("«Надо посмотреть» и «Просмотрено»",
     if (isDesktop(testInfo)) {
       const nav = page.getByRole("navigation", { name: "Разделы" });
       await expect(nav.getByRole("link", { name: /Надо посмотреть/ })).toContainText("0");
-      await expect(nav.getByRole("link", { name: /Просмотрено/ })).toContainText("1");
       await nav.getByRole("link", { name: /Надо посмотреть/ }).click();
       await expect(page).toHaveURL(/list=watchlist/);
       await expect(page.getByText("В «Надо посмотреть» пока пусто")).toBeVisible();
+      // «Просмотрено» — в меню «Ещё»
+      await nav.getByRole("button", { name: "Ещё" }).click();
+      await expect(nav.getByRole("link", { name: /Просмотрено/ })).toContainText("1");
       await nav.getByRole("link", { name: /Просмотрено/ }).click();
       await expect(page).toHaveURL(/list=watched/);
       await expect(catalogCards(page)).toHaveCount(1);
@@ -27,8 +29,10 @@ test.describe("«Надо посмотреть» и «Просмотрено»",
       await expect(page.getByText("В «Просмотрено» пока пусто")).toBeVisible();
     } else {
       const nav = page.getByRole("navigation", { name: "Основная навигация" });
-      await expect(nav.getByRole("link", { name: /Просмотрено/ })).toContainText("1");
-      await nav.getByRole("link", { name: /Просмотрено/ }).click();
+      // «Просмотрено» — в меню «Ещё»
+      await nav.getByRole("button", { name: "Ещё" }).click();
+      await expect(page.getByRole("link", { name: /Просмотрено/ })).toContainText("1");
+      await page.getByRole("link", { name: /Просмотрено/ }).click();
       await expect(page).toHaveURL(/\/watched$/);
       await expect(page.getByRole("heading", { name: "Просмотрено" })).toBeVisible();
       await expect(page.getByText("Орбита 9")).toBeVisible();

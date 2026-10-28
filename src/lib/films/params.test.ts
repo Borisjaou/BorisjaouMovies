@@ -7,6 +7,7 @@ import {
   shelfOf,
   stringifyCatalogQuery,
   toFilmFilters,
+  withPit,
   withShelf,
 } from "./params";
 
@@ -92,6 +93,16 @@ describe("Списки просмотра в URL", () => {
     expect(catalogHref(withShelf(EMPTY_QUERY, "watched"))).toBe("/?list=watched");
     expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), "favorites"))).toBe("/?fav=1");
     expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), null))).toBe("/");
+  });
+});
+
+describe("«Яма» в URL", () => {
+  it("yama=1 → режим «Яма»; с fav или list не включается", () => {
+    expect(parseCatalogQuery({ yama: "1" }).pit).toBe(true);
+    expect(parseCatalogQuery({ yama: "1", fav: "1" }).pit).toBeUndefined();
+    expect(catalogHref(withPit(withShelf(EMPTY_QUERY, "watched")))).toBe("/?yama=1");
+    expect(toFilmFilters(parseCatalogQuery({ yama: "1" }))).toMatchObject({ pit: true });
+    expect(catalogHref(withShelf(withPit(EMPTY_QUERY), null))).toBe("/");
   });
 });
 

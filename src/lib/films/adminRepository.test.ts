@@ -77,6 +77,22 @@ describe("admin films repository", () => {
     expect(changed.shortDescription).toBe("Новый текст.");
   });
 
+  it("ИМХО: оценка и комментарий; «не понравился» убирает из каталога; пустое — без даты", async () => {
+    const film = await site.getFilmBySlug("tihiy-bereg");
+    if (!film) throw new Error("нет данных");
+    const liked = await admin.setImho(film.id, { verdict: "liked", imho: "Пересмотрю" });
+    expect(liked).toMatchObject({ verdict: "liked", imho: "Пересмотрю" });
+    expect(liked.imhoAt).not.toBeNull();
+
+    await admin.setImho(film.id, { verdict: "disliked", imho: "" });
+    expect((await site.getFilms()).items.some((f) => f.id === film.id)).toBe(false);
+    expect((await site.getFilms({ pit: true })).items.map((f) => f.id)).toContain(film.id);
+
+    const cleared = await admin.setImho(film.id, { verdict: null, imho: "" });
+    expect(cleared).toMatchObject({ verdict: null, imho: "", imhoAt: null });
+    expect((await site.getFilms()).items.some((f) => f.id === film.id)).toBe(true);
+  });
+
   it("занятая ссылка", async () => {
     const film = (await admin.listAll())[0];
     expect(await admin.isSlugTaken(film.slug)).toBe(true);

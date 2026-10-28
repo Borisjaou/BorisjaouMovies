@@ -1,5 +1,5 @@
 /**
- * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&duration=…&country=…&sort=…&fav=1 | &list=watchlist
+ * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&duration=…&country=…&sort=…&fav=1 | &list=watchlist | &yama=1
  * Многозначные параметры повторяются: ?genre=Драма&genre=Комедия
  */
 import {
@@ -32,6 +32,8 @@ export interface CatalogQuery {
   fav: boolean;
   /** Режим «Надо посмотреть» / «Просмотрено» на ПК (не вместе с fav) */
   list?: WatchListId;
+  /** «Яма» на ПК: фильмы с ИМХО «не понравился» (их нет в обычном каталоге) */
+  pit?: boolean;
 }
 
 /** Раздел-список каталога на ПК: избранное или один из списков просмотра */
@@ -43,7 +45,17 @@ export function shelfOf(query: CatalogQuery): ShelfId | null {
 
 /** Тот же запрос, но в режиме раздела (null — обычный каталог) */
 export function withShelf(query: CatalogQuery, shelf: ShelfId | null): CatalogQuery {
-  return { ...query, fav: shelf === "favorites", list: shelf === "favorites" || shelf === null ? undefined : shelf };
+  return {
+    ...query,
+    fav: shelf === "favorites",
+    list: shelf === "favorites" || shelf === null ? undefined : shelf,
+    pit: undefined,
+  };
+}
+
+/** Тот же запрос в режиме «Яма» */
+export function withPit(query: CatalogQuery): CatalogQuery {
+  return { ...withShelf(query, null), pit: true };
 }
 
 export const EMPTY_QUERY: CatalogQuery = {
@@ -65,6 +77,7 @@ const KEYS = {
   sort: "sort",
   fav: "fav",
   list: "list",
+  pit: "yama",
 } as const;
 
 function all(sp: SearchParamsRecord, key: string): string[] {
@@ -113,6 +126,7 @@ export function parseCatalogQuery(sp: SearchParamsRecord): CatalogQuery {
       ) ?? "popular",
     fav,
     list: fav ? undefined : oneOf(WATCH_LISTS, first(sp, KEYS.list)),
+    pit: !fav && !first(sp, KEYS.list) && first(sp, KEYS.pit) === "1" ? true : undefined,
   };
 }
 
@@ -139,6 +153,7 @@ export function stringifyCatalogQuery(query: CatalogQuery): string {
   if (query.sort !== "popular") p.set(KEYS.sort, query.sort);
   if (query.fav) p.set(KEYS.fav, "1");
   else if (query.list) p.set(KEYS.list, query.list);
+  else if (query.pit) p.set(KEYS.pit, "1");
   return p.toString();
 }
 
@@ -157,5 +172,6 @@ export function toFilmFilters(query: CatalogQuery): FilmFilters {
     duration: query.duration,
     country: query.country,
     sort: query.sort,
+    ...(query.pit ? { pit: true } : {}),
   };
 }

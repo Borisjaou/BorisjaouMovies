@@ -244,6 +244,36 @@
   gap: 8px;
 }
 
+/* ---------- «Просмотрено» по группам ИМХО (не из эталона) ---------- */
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.groupTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.groupCount {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--muted);
+}
+
 /* ---------- Сетка: README «Адаптив» ---------- */
 .grid {
   display: grid;

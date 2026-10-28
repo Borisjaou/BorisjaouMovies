@@ -119,6 +119,58 @@ const ICONS = {
     linejoin: "round",
     body: <path d="M6.5 4h11a1 1 0 0 1 1 1v15l-6.5-4.2L5.5 20V5a1 1 0 0 1 1-1z" />,
   },
+  // Не из эталона: ИМХО «понравился / не понравился»
+  thumbUp: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linecap: "round",
+    linejoin: "round",
+    body: (
+      <>
+        <path d="M7 10v12" />
+        <path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 8a2 2 0 0 1-1.9 1.4H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9z" />
+      </>
+    ),
+  },
+  thumbDown: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linecap: "round",
+    linejoin: "round",
+    body: (
+      <>
+        <path d="M17 14V2" />
+        <path d="M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9z" />
+      </>
+    ),
+  },
+  // «Яма»
+  pit: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linecap: "round",
+    linejoin: "round",
+    body: (
+      <>
+        <ellipse cx="12" cy="9" rx="9" ry="3.5" />
+        <path d="M3 9v6c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5V9" />
+        <path d="M8 11.8 12 15l4-3.2" />
+      </>
+    ),
+  },
+  menu: {
+    kind: "stroke",
+    strokeWidth: 1.8,
+    linecap: "round",
+    body: <path d="M4 7h16M4 12h16M4 17h16" />,
+  },
+  chevronDown: {
+    kind: "stroke",
+    strokeWidth: 2,
+    linecap: "round",
+    linejoin: "round",
+    body: <path d="M6 9l6 6 6-6" />,
+  },
   watched: {
     kind: "stroke",
     strokeWidth: 1.8,

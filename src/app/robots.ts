@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Служебные и личные страницы: админка, API, вход, профиль, избранное, фильтры (дубли каталога)
-      disallow: ["/admin", "/api/", "/login", "/profile", "/favorites", "/watchlist", "/watched", "/filters"],
+      disallow: ["/admin", "/api/", "/login", "/profile", "/favorites", "/watchlist", "/watched", "/yama", "/filters"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

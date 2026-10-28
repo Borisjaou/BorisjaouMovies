@@ -185,3 +185,26 @@ describe("getFilmBySlug / getNewFilms / getSimilarFilms", () => {
     }
   });
 });
+
+describe("«Яма»: ИМХО «не понравился»", () => {
+  it("скрыта из каталога, новинок и похожих; видна в pit и по ids", async () => {
+    await addFilms([
+      { title: "В яме", verdict: "disliked", imho: "Скучно", isNew: true, popularity: 100 },
+      { title: "Понравился", verdict: "liked", popularity: 99 },
+    ]);
+    const catalog = await titles({});
+    expect(catalog).toContain("Понравился");
+    expect(catalog).not.toContain("В яме");
+    expect(await titles({ pit: true })).toEqual(["В яме"]);
+    expect((await repo.getNewFilms()).map((f) => f.title)).not.toContain("В яме");
+    const orbita = await repo.getFilmBySlug("orbita-9");
+    if (!orbita) throw new Error("нет данных");
+    expect((await repo.getSimilarFilms(orbita, 20)).map((f) => f.title)).not.toContain("В яме");
+
+    const pitFilm = (await repo.getFilms({ pit: true })).items[0];
+    expect(await titles({ ids: [pitFilm.id] })).toEqual(["В яме"]);
+    expect(pitFilm).toMatchObject({ verdict: "disliked", imho: "Скучно" });
+    // Страница фильма из «Ямы» открывается
+    expect(await repo.getFilmBySlug(pitFilm.slug)).not.toBeNull();
+  });
+});

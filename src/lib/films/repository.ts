@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { FILM_INCLUDE, toFilm } from "./mapper";
-import { buildFilmOrderBy, buildFilmWhere } from "./query";
+import { buildFilmOrderBy, buildFilmWhere, NOT_IN_PIT } from "./query";
 import type { Film, FilmFilters, FilmPage } from "./types";
 
 export const PAGE_SIZE = 20;
@@ -46,7 +46,7 @@ export function createFilmsRepository(db: PrismaClient) {
    * Сначала больше общих жанров, затем популярнее, раньше добавлен.
    */
   async function getSimilarFilms(film: Film, limit = 5): Promise<Film[]> {
-    const base = { status: "published", id: { not: film.id } } as const;
+    const base = { status: "published", id: { not: film.id }, ...NOT_IN_PIT } as const;
     const byGenre = (
       await db.film.findMany({
         where: { ...base, genres: { some: { genre: { in: film.genres } } } },
@@ -79,7 +79,7 @@ export function createFilmsRepository(db: PrismaClient) {
   /** «Новинки»: опубликованные с isNew в порядке добавления; limit — 3 на ПК */
   async function getNewFilms(limit?: number): Promise<Film[]> {
     const rows = await db.film.findMany({
-      where: { status: "published", isNew: true },
+      where: { status: "published", isNew: true, ...NOT_IN_PIT },
       orderBy: { id: "asc" },
       include: FILM_INCLUDE,
       take: limit,

@@ -21,7 +21,12 @@ const E2E_DB = resolve("data/e2e.db");
 /**
  * Обычный пользователь — сразу в базе: регистрация на сайте закрыта (только для ADMIN_EMAILS).
  */
-export function createUser(email: string, password = "password123", name = "Тестовый зритель"): void {
+export function createUser(
+  email: string,
+  password = "password123",
+  name = "Тестовый зритель",
+  role: "user" | "admin" = "user",
+): void {
   const db = new Database(E2E_DB);
   try {
     db.prepare('INSERT INTO "User" ("id", "email", "name", "passwordHash", "role") VALUES (?, ?, ?, ?, ?)').run(
@@ -29,8 +34,36 @@ export function createUser(email: string, password = "password123", name = "Те
       email.toLowerCase(),
       name,
       bcrypt.hashSync(password, 4),
-      "user",
+      role,
     );
+  } finally {
+    db.close();
+  }
+}
+
+/** Опубликованный фильм прямо в базе (для тестов, которые меняют его состояние); удалить — deleteFilm */
+export function createFilm(title: string): string {
+  const slug = `e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+  const db = new Database(E2E_DB);
+  try {
+    const { lastInsertRowid } = db
+      .prepare(
+        'INSERT INTO "Film" ("slug", "title", "year", "posterColor", "status", "searchText", "updatedAt") VALUES (?, ?, ?, ?, ?, ?, ?)',
+      )
+      // Формат дат, как пишет Prisma в SQLite: 2026-10-28T07:13:38.594+00:00
+      .run(slug, title, 2024, 3, "published", title.toLowerCase(), new Date().toISOString().replace("Z", "+00:00"));
+    db.prepare('INSERT INTO "FilmGenre" ("filmId", "genre", "position") VALUES (?, ?, 0)').run(lastInsertRowid, "Драма");
+  } finally {
+    db.close();
+  }
+  return slug;
+}
+
+export function deleteFilm(slug: string): void {
+  const db = new Database(E2E_DB);
+  try {
+    db.pragma("foreign_keys = ON");
+    db.prepare('DELETE FROM "Film" WHERE "slug" = ?').run(slug);
   } finally {
     db.close();
   }

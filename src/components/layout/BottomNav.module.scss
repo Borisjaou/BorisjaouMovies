@@ -1,11 +1,13 @@
-.nav {
+.root {
   position: sticky;
   bottom: 0;
   z-index: 20;
+}
+
+.nav {
   display: grid;
-  /* 6 пунктов: колонки по ширине подписи, чтобы «Просмотрено» помещалось на 360px */
-  grid-template-columns: repeat(6, auto);
-  justify-content: space-between;
+  /* Каталог, Посмотреть, Избранное, Ещё, Профиль */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   padding: 8px 8px 14px;
   border-top: 1px solid var(--line);
   background: var(--nav);
@@ -17,9 +19,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 0;
-  /* 10px на 390; на 360 мельче, чтобы подписи не слипались */
-  font-size: min(10px, 2.6vw);
-  letter-spacing: -0.02em;
+  font-size: 11px;
   white-space: nowrap;
   font-weight: 400;
   color: var(--muted);
@@ -28,7 +28,7 @@
 
 .icon {
   position: relative;
-  width: 52px;
+  width: 56px;
   height: 30px;
   border-radius: 15px;
   display: flex;
@@ -47,7 +47,7 @@
 .badge {
   position: absolute;
   top: 0;
-  right: 4px;
+  right: 8px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
@@ -57,6 +57,62 @@
   color: var(--on-accent);
   font-size: 11px;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* «Ещё» (не из эталона) */
+.moreBtn {
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  right: 12px;
+  bottom: calc(100% + 8px);
+  width: min(260px, calc(100vw - 24px));
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--fab-shadow);
+}
+
+.menuItem {
+  height: 48px;
+  padding: 0 12px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.menuOn {
+  background: var(--soft);
+}
+
+.menuLabel {
+  flex-grow: 1;
+}
+
+.menuCount {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;

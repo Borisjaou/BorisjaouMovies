@@ -49,6 +49,11 @@ model Film {
   posterUrl        String?
   trailerUrl       String?
   isNew            Boolean     @default(false)
+  /// ИМХО автора (видно всем): "liked" | "disliked" | null. «Не понравился» — фильм в «Яме», не в каталоге
+  verdict          String?
+  /// Комментарий автора к фильму (ИМХО), видно всем
+  imho             String      @default("")
+  imhoAt           DateTime?
   /// "published" | "draft"
   status           String      @default("draft")
   popularity       Int         @default(0)
@@ -63,6 +68,7 @@ model Film {
   @@index([status, popularity])
   @@index([status, rating])
   @@index([status, year])
+  @@index([status, verdict])
 }
 
 model FilmGenre {

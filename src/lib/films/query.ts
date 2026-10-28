@@ -2,6 +2,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { DECADES, DURATION_OPTIONS, type SortId } from "./constants";
 import type { FilmFilters } from "./types";
 
+/** Не в «Яме»: оценки нет (NULL) или она не «не понравился» */
+export const NOT_IN_PIT: Prisma.FilmWhereInput = { OR: [{ verdict: null }, { verdict: { not: "disliked" } }] };
+
 /** Фильтры каталога → условие запроса. Внутри фильтра — «или», между фильтрами — «и». */
 export function buildFilmWhere(filters: FilmFilters): Prisma.FilmWhereInput {
   const and: Prisma.FilmWhereInput[] = [];
@@ -10,6 +13,10 @@ export function buildFilmWhere(filters: FilmFilters): Prisma.FilmWhereInput {
   if (status !== "all") and.push({ status });
 
   if (filters.ids) and.push({ id: { in: [...filters.ids] } });
+
+  // «Яма»: только «не понравился». Без ids (каталог, новинки, похожие) такие фильмы скрыты
+  if (filters.pit) and.push({ verdict: "disliked" });
+  else if (!filters.ids) and.push(NOT_IN_PIT);
 
   const q = filters.query?.trim().toLowerCase();
   if (q) and.push({ searchText: { contains: q } });

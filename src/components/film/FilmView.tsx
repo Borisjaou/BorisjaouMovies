@@ -7,7 +7,12 @@ import { filmPosterVar } from "@/components/films/poster";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { cx } from "@/lib/cx";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { ImhoBlock } from "@/components/imho/ImhoBlock";
+import { ImhoSheet } from "@/components/imho/ImhoSheet";
 import { useFavorites } from "@/lib/favorites";
+import type { ImhoValue } from "@/lib/films/imho";
 import { SHELVES } from "@/lib/shelves";
 import { useWatchList, type WatchListId } from "@/lib/watchlists";
 import { filmMeta, formatDuration } from "@/lib/films/format";
@@ -37,9 +42,21 @@ export function FilmView({ film, similar }: FilmViewProps) {
   // «Надо посмотреть» / «Просмотрено»: фильм может быть только в одном из них
   const watchlist = useWatchList("watchlist");
   const watched = useWatchList("watched");
+  // ИМХО автора; админу после отметки «Просмотрено» — окно «Как вам фильм?»
+  const router = useRouter();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
+  const [imho, setImho] = useState<ImhoValue>({ verdict: film.verdict, imho: film.imho, imhoAt: film.imhoAt });
+  const [imhoSheet, setImhoSheet] = useState(false);
+  const closeImhoSheet = useCallback(() => setImhoSheet(false), []);
+  const toggleWatched = () => {
+    const added = watched.toggle(film.id);
+    if (added && isAdmin) setImhoSheet(true);
+  };
+
   const lists: ReadonlyArray<{ id: WatchListId; on: boolean; toggle: () => void }> = [
     { id: "watchlist", on: watchlist.has(film.id), toggle: () => watchlist.toggle(film.id) },
-    { id: "watched", on: watched.has(film.id), toggle: () => watched.toggle(film.id) },
+    { id: "watched", on: watched.has(film.id), toggle: toggleWatched },
   ];
   const listIcon = (id: WatchListId, on: boolean, size: number) => (
     <Icon name={SHELVES[id].icon} size={size} filled={on && id !== "watched"} className={cx(on && styles.listOn)} />
@@ -137,6 +154,8 @@ export function FilmView({ film, similar }: FilmViewProps) {
               </button>
             ))}
           </div>
+
+          <ImhoBlock filmId={film.id} value={imho} onChange={setImho} layout="f" />
 
           {fav && (
             <div role="status" className={styles.mFavStatus}>
@@ -245,6 +264,8 @@ export function FilmView({ film, similar }: FilmViewProps) {
                 </div>
               </div>
 
+              <ImhoBlock filmId={film.id} value={imho} onChange={setImho} layout="d" />
+
               {crew.length > 0 && (
                 <dl className={styles.dCrew}>
                   {crew.map((row) => (
@@ -280,6 +301,17 @@ export function FilmView({ film, similar }: FilmViewProps) {
       </div>
 
       {shareOpen && <ShareDialog film={film} onClose={closeShare} />}
+      {imhoSheet && (
+        <ImhoSheet
+          film={film}
+          value={imho}
+          onSaved={(next) => {
+            setImho(next);
+            router.refresh();
+          }}
+          onClose={closeImhoSheet}
+        />
+      )}
     </div>
   );
 }

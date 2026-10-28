@@ -1,5 +1,3 @@
-@use "breakpoints" as bp;
-
 .header {
   position: sticky;
   top: 0;
@@ -39,31 +37,63 @@
   text-decoration: none;
 }
 
-/* 1024–1279: у разделов-списков вместо подписи иконка (подпись остаётся для чтения с экрана) */
-.navIcon {
-  display: none;
+/* «Ещё»: Жанры, Просмотрено, Яма (не из эталона) */
+.more {
+  position: relative;
 }
 
-@include bp.between(lg, xl) {
-  .navItem {
-    padding: 0 12px;
-  }
+.moreBtn {
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
 
-  .navIcon {
-    display: block;
-  }
+.moreBtn.navOn {
+  background: var(--soft);
+}
 
-  .shelfLabel {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+.chevron {
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  min-width: 220px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--fab-shadow);
+}
+
+.menuItem {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--soft);
   }
 }
 
-.navOn {
+.menuOn {
   background: var(--soft);
 }
 
