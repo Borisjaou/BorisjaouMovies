@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition, type ChangeEvent, type DragEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+  type ChangeEvent,
+  type DragEvent,
+  type ReactNode,
+} from "react";
 import { importFilmAction, saveFilmAction, type SavedFilm, type SaveFilmResult } from "@/app/admin/films/actions";
+import type { DuplicateFilm } from "@/lib/films/adminRepository";
 import { Icon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle/ThemeToggle";
 import { Chip } from "@/components/ui/Chip";
@@ -26,6 +35,7 @@ import {
 import { slugify } from "@/lib/films/slugify";
 import { detectImage, POSTER_ERROR, POSTER_MAX_BYTES, POSTER_TYPES } from "@/lib/storage/image";
 import { AdminHeader } from "./AdminHeader";
+import { DuplicateDialog } from "./DuplicateDialog";
 import { SuccessDialog } from "./SuccessDialog";
 import styles from "./FilmForm.module.scss";
 
@@ -67,6 +77,9 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedFilm | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  // Похожие фильмы: окно «Добавить всё равно?» и с каким действием повторить сохранение
+  const [duplicates, setDuplicates] = useState<{ list: DuplicateFilm[]; intent: "draft" | "publish" } | null>(null);
+  const closeDuplicates = useCallback(() => setDuplicates(null), []);
   // Автозаполнение по ссылке
   const [importLink, setImportLink] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
@@ -142,6 +155,7 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
         cast: v.cast || cur.cast,
         description: v.description || cur.description,
         trailerUrl: v.trailerUrl || cur.trailerUrl,
+        externalId: v.externalId,
       }));
       setServerErrors({});
       if (result.poster) {
@@ -238,7 +252,12 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     }
   };
 
-  const applyResult = (result: SaveFilmResult) => {
+  const applyResult = (result: SaveFilmResult, intent: "draft" | "publish") => {
+    if (!result.ok && result.duplicates?.length) {
+      setDuplicates({ list: result.duplicates, intent });
+      return;
+    }
+    setDuplicates(null);
     if (result.ok) {
       setSaved(result.film);
       router.refresh();
@@ -249,7 +268,7 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     focusFirstProblem([...result.missing, ...(Object.keys(result.fieldErrors) as ErrorKey[])]);
   };
 
-  const submit = (intent: "draft" | "publish") => {
+  const submit = (intent: "draft" | "publish", force = false) => {
     setTried(true);
     setFormError(null);
     const problems: ErrorKey[] = [...check.missing, ...(Object.keys(check.fieldErrors) as ErrorKey[])];
@@ -276,11 +295,13 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
     for (const key of texts) fd.set(key, values[key]);
     for (const g of values.genres) fd.append("genres", g);
     fd.set("isNew", values.isNew ? "1" : "0");
+    fd.set("externalId", values.externalId);
+    if (force) fd.set("force", "1");
     if (poster.file) fd.set("poster", poster.file);
 
     startTransition(async () => {
       try {
-        applyResult(await saveFilmAction(fd));
+        applyResult(await saveFilmAction(fd), intent);
       } catch {
         setFormError("Не удалось сохранить фильм. Проверьте соединение и попробуйте ещё раз");
       }
@@ -640,6 +661,15 @@ export function FilmForm({ filmId, slug: fixedSlug, initialValues, initialPoster
       </div>
 
       {saved && <SuccessDialog film={saved} onAddAnother={addAnother} />}
+      {duplicates && (
+        <DuplicateDialog
+          duplicates={duplicates.list}
+          editing={Boolean(filmId)}
+          pending={pending}
+          onConfirm={() => submit(duplicates.intent, true)}
+          onCancel={closeDuplicates}
+        />
+      )}
     </div>
   );
 }

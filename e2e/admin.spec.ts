@@ -100,6 +100,37 @@ test.describe("Добавление фильма", () => {
     expect(sitemap).not.toContain(slug);
   });
 
+  test("дубль по названию: окно «Похожий фильм уже есть», «Отмена» и «Добавить всё равно»", async ({ page }, testInfo) => {
+    const p = isDesktop(testInfo) ? "d" : "f";
+    const title = `Дубль ${Date.now()}`;
+    await signInAsAdmin(page);
+
+    const fill = async (name: string) => {
+      await page.goto("/admin/films/new");
+      await page.locator(`#${p}-title`).fill(name);
+      await page.locator(`#${p}-year`).fill("2025");
+      await page.getByRole("group", { name: "Жанры" }).locator("visible=true").getByRole("button", { name: "Драма", exact: true }).click();
+    };
+
+    await fill(title);
+    await page.getByRole("button", { name: "В черновик" }).locator("visible=true").click();
+    await expect(page.getByRole("dialog", { name: "Черновик сохранён" })).toBeVisible();
+
+    // То же название другим регистром и с годом в скобках
+    await fill(`${title.toUpperCase()} (2025)`);
+    await page.getByRole("button", { name: "В черновик" }).locator("visible=true").click();
+    const dup = page.getByRole("alertdialog", { name: "Похожий фильм уже есть" });
+    await expect(dup).toBeVisible();
+    await expect(dup.getByRole("link", { name: new RegExp(title) })).toBeVisible();
+    await dup.getByRole("button", { name: "Отмена" }).click();
+    await expect(dup).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Черновик сохранён" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "В черновик" }).locator("visible=true").click();
+    await page.getByRole("alertdialog", { name: "Похожий фильм уже есть" }).getByRole("button", { name: "Добавить всё равно" }).click();
+    await expect(page.getByRole("dialog", { name: "Черновик сохранён" })).toBeVisible();
+  });
+
   test("страницы админки не отдаются обычному пользователю (редирект в proxy)", async ({ page }) => {
     await register(page, uniqueEmail("nonadmin"));
     const res = await page.request.get("/admin/films/new", { maxRedirects: 0 });

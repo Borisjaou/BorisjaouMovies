@@ -30,6 +30,11 @@ import { useLoadMore } from "./useLoadMore";
 import styles from "./CatalogView.module.scss";
 
 const SEARCH_DELAY_MS = 300;
+
+/** q в адресе: без пробелов по краям, не длиннее 100 (как parseCatalogQuery) */
+function normalizeQ(value: string): string {
+  return value.trim().slice(0, 100);
+}
 const PLACEHOLDER = "Фильм, актёр, режиссёр";
 
 interface CatalogViewProps {
@@ -60,30 +65,56 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
   const update = (patch: Partial<CatalogQuery>) => navigate({ ...queryRef.current, ...patch });
 
   // ---- Поиск с задержкой 300 мс ----
+  // Поле — источник правды, пока пользователь печатает. Адрес обновляется с задержкой, и ответы
+  // могут приходить с опозданием: такой «старый» q из адреса не должен затирать то, что уже набрано.
   const [search, setSearch] = useState(query.q);
   const [urlQ, setUrlQ] = useState(query.q);
+  /** q, которые мы сами отправили в адрес и ещё не увидели там (по порядку) */
+  const [sentQs, setSentQs] = useState<readonly string[]>([]);
+  /** Растёт, когда адрес сменился извне (назад, рубрика) — отложенный поиск отменяется */
+  const [externalChanges, setExternalChanges] = useState(0);
   if (query.q !== urlQ) {
-    // URL изменился извне (назад/вперёд, сброс) — подтягиваем значение поля
     setUrlQ(query.q);
-    if (query.q !== search.trim()) setSearch(query.q);
+    const own = sentQs.indexOf(query.q);
+    if (own >= 0) {
+      // Дошёл наш запрос (возможно, устаревший промежуточный) — поле не трогаем
+      setSentQs(sentQs.slice(own + 1));
+    } else if (query.q !== normalizeQ(search)) {
+      // Адрес сменился извне: назад/вперёд, рубрика, сброс
+      setSearch(query.q);
+      setSentQs([]);
+      setExternalChanges((n) => n + 1);
+    }
   }
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
+  const cancelTimer = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+  };
+  useEffect(() => cancelTimer, []);
+  useEffect(cancelTimer, [externalChanges]);
+
+  /** Отправить q в адрес (и запомнить, что ждём именно его) */
+  const navigateWithQ = (next: CatalogQuery) => {
+    const q = normalizeQ(next.q);
+    if (q !== queryRef.current.q) setSentQs((list) => [...list.slice(-9), q]);
+    navigate({ ...next, q });
+  };
   const onSearch = (value: string) => {
     setSearch(value);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => update({ q: value }), SEARCH_DELAY_MS);
+    cancelTimer();
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      if (normalizeQ(value) !== queryRef.current.q) navigateWithQ({ ...queryRef.current, q: value });
+    }, SEARCH_DELAY_MS);
   };
   const resetTo = (next: CatalogQuery) => {
-    if (timer.current) clearTimeout(timer.current);
+    cancelTimer();
     setSearch(next.q);
-    navigate(next);
+    navigateWithQ(next);
   };
+  /** Рубрика (жанр): поиск сбрасывается, поле очищается */
+  const pickSection = (patch: Partial<CatalogQuery>) => resetTo({ ...queryRef.current, ...patch, q: "" });
 
   // ---- Список ----
   // Каталог: первая страница с сервера + подгрузка следующих при прокрутке (по 20)
@@ -114,7 +145,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
 
   // ---- Жанры ----
   const toggleGenre = (g: Genre) =>
-    update({ genres: query.genres.includes(g) ? query.genres.filter((x) => x !== g) : [...query.genres, g] });
+    pickSection({ genres: query.genres.includes(g) ? query.genres.filter((x) => x !== g) : [...query.genres, g] });
 
   const sortIndex = SORT_OPTIONS.findIndex((s) => s.id === query.sort);
   const cycleSort = () => update({ sort: SORT_OPTIONS[(sortIndex + 1) % SORT_OPTIONS.length].id });
@@ -180,8 +211,8 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
       {/* ---------- ПК: шапка (DeskCatalog) ---------- */}
       <DesktopHeader
         active={shelf ?? (pit ? "yama" : "catalog")}
-        catalogHref={catalogHref(withShelf(query, null))}
-        shelfQuery={withShelf(query, null)}
+        catalogHref={catalogHref({ ...withShelf(query, null), q: "" })}
+        shelfQuery={{ ...withShelf(query, null), q: "" }}
         search={searchField("d-search", "md")}
         isAdmin={isAdmin}
       />
@@ -194,9 +225,9 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
           <h1 className="visually-hidden">{sectionTitle ?? "Каталог фильмов"}</h1>
           {/* Мобила: жанры одной строкой */}
           <div role="group" aria-label="Жанры" className={cx(styles.mChips, "only-mobile")}>
-            <Chip label="Все" on={query.genres.length === 0} onClick={() => update({ genres: [] })} />
+            <Chip label="Все" on={query.genres.length === 0} onClick={() => pickSection({ genres: [] })} />
             {CATALOG_GENRES.map((g) => (
-              <Chip key={g} label={g} on={query.genres.includes(g)} onClick={() => update({ genres: [g] })} />
+              <Chip key={g} label={g} on={query.genres.includes(g)} onClick={() => pickSection({ genres: [g] })} />
             ))}
           </div>
 
@@ -247,7 +278,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
               />
             </div>
             <div role="group" aria-label="Быстрый выбор жанра" className={cx(styles.dChips, "only-desktop")}>
-              <Chip label="Все жанры" on={query.genres.length === 0} onClick={() => update({ genres: [] })} />
+              <Chip label="Все жанры" on={query.genres.length === 0} onClick={() => pickSection({ genres: [] })} />
               {CATALOG_GENRES.map((g) => (
                 <Chip key={g} label={g} on={query.genres.includes(g)} onClick={() => toggleGenre(g)} />
               ))}

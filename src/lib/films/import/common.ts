@@ -17,6 +17,8 @@ export interface ImportedFilm {
   /** Адрес картинки постера у источника (скачивается отдельно) */
   posterUrl: string | null;
   source: "kinopoisk" | "tmdb";
+  /** Для проверки дублей: "kp:326", "tmdb-movie:603", "tmdb-tv:1396" */
+  externalId: string;
 }
 
 export type FetchFn = (input: string, init?: { headers?: Record<string, string> }) => Promise<Response>;

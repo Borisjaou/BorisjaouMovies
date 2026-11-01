@@ -151,9 +151,11 @@
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 0;
+  /* Плотная подложка с обводкой и тенью — кнопки видны на любом постере (не из эталона: там стекло) */
+  border: 1px solid var(--line);
   border-radius: 22px;
-  background: var(--glass);
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(13, 13, 13, 0.22);
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -161,13 +163,18 @@
   cursor: pointer;
 }
 
+/* Включённые: заливка цветом, иконка контрастная */
 .favOn {
-  color: var(--heart);
+  border-color: transparent;
+  background: var(--heart);
+  color: var(--surface);
 }
 
 /* «Надо посмотреть» / «Просмотрено» включены */
 .listOn {
-  color: var(--accent);
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 /* ПК 1024–1279: в узкой карточке 4 кнопки (поделиться + 3 списка) — компактнее */

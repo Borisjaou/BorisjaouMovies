@@ -28,7 +28,12 @@ export interface FilmFormValues {
   description: string;
   trailerUrl: string;
   isNew: boolean;
+  /** Скрытое поле: источник автозаполнения ("kp:326"), см. EXTERNAL_ID_RE */
+  externalId: string;
 }
+
+/** Источник автозаполнения: Кинопоиск или TMDB (фильм / сериал) */
+export const EXTERNAL_ID_RE = /^(kp|tmdb-movie|tmdb-tv):\d{1,12}$/;
 
 export const EMPTY_FILM_FORM: FilmFormValues = {
   title: "",
@@ -42,6 +47,7 @@ export const EMPTY_FILM_FORM: FilmFormValues = {
   description: "",
   trailerUrl: "",
   isNew: true, // «Показать в «Новинках»» включено по умолчанию
+  externalId: "",
 };
 
 /** Проверенные данные для записи в базу */
@@ -57,6 +63,7 @@ export interface FilmInput {
   description: string;
   trailerUrl: string | null;
   isNew: boolean;
+  externalId: string | null;
 }
 
 export type FilmFormField = keyof FilmFormValues;
@@ -70,7 +77,6 @@ export const FILM_FORM_MESSAGES = {
   year: `Год — от ${YEAR_MIN} до ${YEAR_MAX}`,
   duration: "Длительность — целое число минут, от 1 до 999",
   trailer: "Ссылка должна начинаться с http:// или https://",
-  slugTaken: "Фильм с такой ссылкой уже есть — измените название",
 } as const;
 
 const optionalText = (max: number) =>
@@ -108,6 +114,8 @@ const formatSchema = z.object({
     .refine((v) => v === "" || /^https?:\/\/[^\s]+\.[^\s]+/.test(v), FILM_FORM_MESSAGES.trailer)
     .transform((v) => v || null),
   isNew: z.boolean(),
+  // Скрытое поле: неизвестный формат просто не сохраняется
+  externalId: z.string().transform((v) => (EXTERNAL_ID_RE.test(v.trim()) ? v.trim() : null)),
 });
 
 export interface FilmFormCheck {
@@ -169,6 +177,7 @@ export function filmFormValuesFromFormData(fd: FormData): FilmFormValues {
     description: str("description"),
     trailerUrl: str("trailerUrl"),
     isNew: str("isNew") === "1",
+    externalId: str("externalId"),
   };
 }
 
@@ -186,5 +195,6 @@ export function filmToFormValues(film: Film): FilmFormValues {
     description: film.description,
     trailerUrl: film.trailerUrl ?? "",
     isNew: film.isNew,
+    externalId: film.externalId ?? "",
   };
 }

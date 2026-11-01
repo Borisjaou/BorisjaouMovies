@@ -28,6 +28,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 2,
@@ -50,6 +51,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 3,
@@ -71,6 +73,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 4,
@@ -92,6 +95,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 5,
@@ -113,6 +117,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 6,
@@ -134,6 +139,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 7,
@@ -155,6 +161,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 8,
@@ -176,6 +183,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 9,
@@ -197,6 +205,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     id: 10,
@@ -218,6 +227,7 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
   {
     // AdminFilms: { title: 'Без названия (черновик)', year: 2026, genre: 'Драма', pub: false, c: 5 }
@@ -240,5 +250,6 @@ export const FILMS: readonly Film[] = [
     verdict: null,
     imho: "",
     imhoAt: null,
+    externalId: null,
   },
 ];

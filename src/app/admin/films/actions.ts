@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { adminFilms } from "@/lib/films/admin";
+import type { DuplicateFilm } from "@/lib/films/adminRepository";
 import {
   checkFilmForm,
-  FILM_FORM_MESSAGES,
   filmFormValuesFromFormData,
   type FilmFormField,
   type RequiredField,
@@ -32,11 +32,14 @@ export type SaveFilmResult =
       missing: RequiredField[];
       fieldErrors: Partial<Record<FilmFormField | "poster", string>>;
       formError?: string;
+      /** Похожие фильмы: форма спрашивает «Добавить всё равно?» и повторяет запрос с force=1 */
+      duplicates?: DuplicateFilm[];
     };
 
 const metaSchema = z.object({
   intent: z.enum(["draft", "publish"]),
   id: z.union([z.literal(""), z.coerce.number().int().positive()]),
+  force: z.boolean(),
 });
 
 const FORBIDDEN_TEXT = "Нет доступа: действие только для администратора";
@@ -64,7 +67,11 @@ export async function saveFilmAction(formData: FormData): Promise<SaveFilmResult
     return fail({ formError: FORBIDDEN_TEXT });
   }
 
-  const meta = metaSchema.safeParse({ intent: formData.get("intent"), id: formData.get("id") ?? "" });
+  const meta = metaSchema.safeParse({
+    intent: formData.get("intent"),
+    id: formData.get("id") ?? "",
+    force: formData.get("force") === "1",
+  });
   if (!meta.success) return fail({ formError: FAILED_TEXT });
   const id = meta.data.id === "" ? null : meta.data.id;
   const status: FilmStatus = meta.data.intent === "publish" ? "published" : "draft";
@@ -82,11 +89,19 @@ export async function saveFilmAction(formData: FormData): Promise<SaveFilmResult
   const existing = id === null ? null : await adminFilms.getById(id);
   if (id !== null && !existing) return fail({ formError: "Фильм не найден — возможно, его уже удалили" });
 
-  // Ссылка /film/{slug}: у нового — из названия (как в эталоне), у существующего не меняется
-  const slug = existing ? existing.slug : slugify(check.data.title);
-  if (!existing && (await adminFilms.isSlugTaken(slug))) {
-    return fail({ fieldErrors: { title: FILM_FORM_MESSAGES.slugTaken } });
+  // Дубли: новый фильм — всегда; правка — если поменяли название, оригинальное название или источник
+  const identityChanged =
+    !existing ||
+    existing.title !== check.data.title ||
+    (existing.originalTitle ?? null) !== check.data.originalTitle ||
+    existing.externalId !== check.data.externalId;
+  if (!meta.data.force && identityChanged) {
+    const duplicates = await adminFilms.findDuplicates(check.data, existing?.id);
+    if (duplicates.length) return fail({ duplicates });
   }
+
+  // Ссылка /film/{slug}: у нового — из названия (как в эталоне; занята — с годом), у существующего не меняется
+  const slug = existing ? existing.slug : await adminFilms.uniqueSlug(slugify(check.data.title), check.data.year);
 
   const storage = getFileStorage();
   const stored = poster.file

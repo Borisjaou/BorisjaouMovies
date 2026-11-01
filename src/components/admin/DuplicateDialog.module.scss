@@ -1,0 +1,154 @@
+@use "breakpoints" as bp;
+
+/* Шторка на мобиле, окно 480 на ПК — как SuccessDialog */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  @include bp.from(lg) {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: var(--overlay);
+  cursor: pointer;
+}
+
+.dialog {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px var(--gutter) 24px;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
+  color: var(--ink);
+  text-align: center;
+
+  @include bp.from(lg) {
+    width: 480px;
+    gap: 14px;
+    padding: 32px;
+    border-radius: 28px;
+  }
+}
+
+.mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 32px;
+  background: var(--draft-bg);
+  color: var(--draft-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+
+  @include bp.from(lg) {
+    font-size: 26px;
+  }
+}
+
+.text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.list {
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.item {
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.itemTitle {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.year {
+  color: var(--muted);
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: var(--soft);
+  font-size: 12px;
+}
+
+.buttons {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cancel,
+.confirm {
+  height: 54px;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.cancel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.confirm {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+}

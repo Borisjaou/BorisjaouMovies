@@ -99,4 +99,32 @@ describe("admin films repository", () => {
     expect(await admin.isSlugTaken(film.slug, film.id)).toBe(false);
     expect(await admin.isSlugTaken("net-takogo")).toBe(false);
   });
+
+  it("дубли: по названию в любую сторону, без года в скобках; по источнику; себя не находит", async () => {
+    const orbita = await site.getFilmBySlug("orbita-9");
+    if (!orbita) throw new Error("нет данных");
+    const none = { originalTitle: null, externalId: null };
+    expect((await admin.findDuplicates({ title: "ОРБИТА  9!", ...none })).map((d) => d.slug)).toEqual(["orbita-9"]);
+    expect((await admin.findDuplicates({ title: "Орбита 9 (2024)", ...none }))[0]).toMatchObject({ reason: "title" });
+    expect(await admin.findDuplicates({ title: "Орбита 9", ...none }, orbita.id)).toEqual([]);
+    expect(await admin.findDuplicates({ title: "Совсем другой", ...none })).toEqual([]);
+
+    const created = await admin.create(input({ title: "Матрица", originalTitle: "The Matrix", externalId: "kp:301" }), {
+      status: "draft",
+      slug: await admin.uniqueSlug("matritsa", 1999),
+    });
+    // Английское название нового фильма = оригинальное название старого
+    expect((await admin.findDuplicates({ title: "the matrix", ...none })).map((d) => d.id)).toEqual([created.id]);
+    // Тот же источник при другом названии
+    expect(await admin.findDuplicates({ title: "Матрица: перезагрузка", originalTitle: null, externalId: "kp:301" })).toEqual([
+      expect.objectContaining({ id: created.id, reason: "source" }),
+    ]);
+  });
+
+  it("свободная ссылка: при совпадении добавляется год, затем номер", async () => {
+    expect(await admin.uniqueSlug("net-takogo", 2020)).toBe("net-takogo");
+    expect(await admin.uniqueSlug("orbita-9", 2024)).toBe("orbita-9-2024");
+    await admin.create(input({ title: "Орбита 9", year: "2024" }), { status: "draft", slug: "orbita-9-2024" });
+    expect(await admin.uniqueSlug("orbita-9", 2024)).toBe("orbita-9-2024-2");
+  });
 });

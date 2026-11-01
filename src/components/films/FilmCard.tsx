@@ -44,7 +44,7 @@ export function FilmCard({ film, shelves, onToggle, onShare }: FilmCardProps) {
           aria-label={`Скопировать ссылку: ${film.title}`}
           className={cx(styles.glass, styles.share)}
         >
-          <Icon name="share" size={20} />
+          <Icon name="share" size={20} strokeWidth={2} />
         </button>
         {SHELF_ORDER.map((id) => {
           const on = shelves[id];
@@ -59,7 +59,7 @@ export function FilmCard({ film, shelves, onToggle, onShare }: FilmCardProps) {
               className={cx(styles.glass, on && (id === "favorites" ? styles.favOn : styles.listOn))}
             >
               {/* У «Просмотрено» контур с галочкой: включённое состояние — цветом */}
-              <Icon name={info.icon} size={id === "favorites" ? 22 : 20} filled={on && id !== "watched"} />
+              <Icon name={info.icon} size={id === "favorites" ? 22 : 20} strokeWidth={2} filled={on && id !== "watched"} />
             </button>
           );
         })}

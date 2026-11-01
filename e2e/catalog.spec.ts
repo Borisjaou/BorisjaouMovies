@@ -10,6 +10,40 @@ test.describe("Поиск", () => {
     await expect(catalogCards(page).first()).toContainText("Орбита 9");
   });
 
+  test("быстрый набор: буквы не пропадают и не переставляются", async ({ page }) => {
+    await page.goto("/");
+    const box = page.getByRole("searchbox", { name: "Поиск фильмов" }).locator("visible=true");
+    await box.click();
+    // Паузы ~ задержке поиска: адрес обновляется, пока пользователь продолжает печатать
+    for (const ch of "тихий берег") {
+      await page.keyboard.type(ch);
+      await page.waitForTimeout(ch === " " ? 450 : 120);
+    }
+    await page.waitForTimeout(1200);
+    await expect(box).toHaveValue("тихий берег");
+    await expect(page).toHaveURL(/q=%D1%82%D0%B8%D1%85%D0%B8%D0%B9(\+|%20)%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/);
+    await expect(catalogCards(page)).toHaveCount(1);
+  });
+
+  test("рубрика сбрасывает поиск и очищает поле", async ({ page }, testInfo) => {
+    await page.goto("/?q=" + encodeURIComponent("орбита"));
+    const box = page.getByRole("searchbox", { name: "Поиск фильмов" }).locator("visible=true");
+    await expect(box).toHaveValue("орбита");
+    if (isDesktop(testInfo)) {
+      await page.getByRole("navigation", { name: "Разделы" }).getByRole("link", { name: /Избранное/ }).click();
+      await expect(page).toHaveURL(/fav=1/);
+      await expect(page).not.toHaveURL(/q=/);
+      await expect(box).toHaveValue("");
+      await page.goto("/?q=" + encodeURIComponent("орбита"));
+      await page.getByRole("group", { name: "Быстрый выбор жанра" }).getByRole("button", { name: "Драма" }).click();
+    } else {
+      await page.getByRole("group", { name: "Жанры" }).getByRole("button", { name: "Драма" }).click();
+    }
+    await expect(page).toHaveURL(/genre=/);
+    await expect(page).not.toHaveURL(/q=/);
+    await expect(box).toHaveValue("");
+  });
+
   test("ищет по режиссёру и актёрам", async ({ page }) => {
     await page.goto("/?q=" + encodeURIComponent("режиссёр"));
     await expect(catalogCards(page).first()).toBeVisible();

@@ -33,6 +33,8 @@ export interface Film {
   posterUrl?: string;
   /** «Ссылка на трейлер» из формы админки (AdminAdd) */
   trailerUrl?: string;
+  /** Источник автозаполнения: "kp:326", "tmdb-movie:603" — для проверки дублей */
+  externalId: string | null;
   /** «Показать в «Новинках»» */
   isNew: boolean;
   status: FilmStatus;

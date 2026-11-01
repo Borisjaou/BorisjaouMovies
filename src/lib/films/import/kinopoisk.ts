@@ -81,5 +81,6 @@ export async function importFromKinopoisk(id: string, apiKey: string, fetchFn: F
     trailerUrl: youtubeUrl(trailer?.url),
     posterUrl: f.posterUrl ?? null,
     source: "kinopoisk",
+    externalId: `kp:${id}`,
   };
 }

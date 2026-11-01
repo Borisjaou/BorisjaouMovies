@@ -129,5 +129,6 @@ export async function importFromTmdb(
     trailerUrl: video ? `https://www.youtube.com/watch?v=${video.key}` : "",
     posterUrl: d.poster_path ? `${IMAGES}${d.poster_path}` : null,
     source: "tmdb",
+    externalId: `tmdb-${kind}:${id}`,
   };
 }

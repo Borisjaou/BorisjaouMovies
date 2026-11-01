@@ -41,6 +41,7 @@ describe("checkFilmForm", () => {
       description: "",
       trailerUrl: null,
       isNew: true,
+      externalId: null,
     });
   });
 
@@ -71,6 +72,15 @@ describe("checkFilmForm", () => {
   it("незнакомый жанр отклоняется", () => {
     const r = checkFilmForm({ ...valid, genres: ["Вестерн" as never] });
     expect(r.data).toBeNull();
+  });
+});
+
+describe("externalId (скрытое поле автозаполнения)", () => {
+  it("известный формат сохраняется, остальное — null", () => {
+    const base = { ...EMPTY_FILM_FORM, title: "Т", year: "2024", genres: ["Драма" as const] };
+    expect(checkFilmForm({ ...base, externalId: "kp:326" }).data?.externalId).toBe("kp:326");
+    expect(checkFilmForm({ ...base, externalId: "tmdb-tv:1396" }).data?.externalId).toBe("tmdb-tv:1396");
+    expect(checkFilmForm({ ...base, externalId: "javascript:1" }).data?.externalId).toBeNull();
   });
 });
 

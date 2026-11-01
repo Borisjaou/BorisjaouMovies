@@ -108,6 +108,7 @@ describe("importFilm", () => {
       trailerUrl: "https://www.youtube.com/watch?v=abc",
       posterUrl: "https://kinopoiskapiunofficial.tech/images/posters/kp/326.jpg",
       source: "kinopoisk",
+      externalId: "kp:326",
     });
     expect(calls.every((c) => c.includes('"X-API-KEY":"kp-key"'))).toBe(true);
   });
@@ -155,6 +156,7 @@ describe("importFilm", () => {
       trailerUrl: "https://www.youtube.com/watch?v=ru1",
       posterUrl: "https://image.tmdb.org/t/p/w780/abc.jpg",
       source: "tmdb",
+      externalId: "tmdb-movie:603",
     });
     expect(calls.every((c) => c.includes('"Authorization":"Bearer eyJtoken"'))).toBe(true);
   });

@@ -47,6 +47,8 @@ model Film {
   posterShape      Int         @default(0)
   posterUrl        String?
   trailerUrl       String?
+  /// Откуда заполнен фильм: "kp:326" | "tmdb-movie:603" | "tmdb-tv:1396" — для проверки дублей
+  externalId       String?
   isNew            Boolean     @default(false)
   /// ИМХО автора (видно всем): "liked" | "disliked" | null. «Не понравился» — фильм в «Яме», не в каталоге
   verdict          String?
@@ -68,6 +70,7 @@ model Film {
   @@index([status, rating])
   @@index([status, year])
   @@index([status, verdict])
+  @@index([externalId])
 }
 
 model FilmGenre {
