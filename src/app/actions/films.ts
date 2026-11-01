@@ -21,6 +21,15 @@ export async function loadFilmsPageAction(search: string, page: number): Promise
  * Фильмы из избранного с фильтрами и сортировкой каталога.
  * id приходят с клиента: у гостя — из localStorage, у пользователя — из базы через контекст.
  */
+/**
+ * «Не смотрел»: каталог с фильтрами из `search` без фильмов, отмеченных «Просмотрено».
+ * Список просмотренных хранится у зрителя (браузер или аккаунт), поэтому id приходят с клиента.
+ */
+export async function unwatchedFilmsAction(watchedIds: number[], search = ""): Promise<Film[]> {
+  const exclude = idsSchema.parse(watchedIds);
+  return (await getFilms({ ...filtersFrom(search), excludeIds: exclude }, { pageSize: MAX_IDS })).items;
+}
+
 export async function favoriteFilmsAction(ids: number[], search = ""): Promise<Film[]> {
   const list = idsSchema.parse(ids);
   if (list.length === 0) return [];

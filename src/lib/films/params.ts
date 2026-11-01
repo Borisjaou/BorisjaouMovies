@@ -1,5 +1,5 @@
 /**
- * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&duration=…&country=…&sort=…&fav=1 | &list=watchlist | &yama=1
+ * Состояние каталога в URL: /?q=…&genre=…&decade=…&from=…&to=…&duration=…&country=…&sort=…&unwatched=1&fav=1 | &list=watchlist | &yama=1
  * Многозначные параметры повторяются: ?genre=Драма&genre=Комедия
  */
 import {
@@ -34,6 +34,8 @@ export interface CatalogQuery {
   list?: WatchListId;
   /** «Яма» на ПК: фильмы с ИМХО «не понравился» (их нет в обычном каталоге) */
   pit?: boolean;
+  /** «Не смотрел»: без фильмов из «Просмотрено» зрителя (список — на клиенте) */
+  unwatched: boolean;
 }
 
 /** Раздел-список каталога на ПК: избранное или один из списков просмотра */
@@ -62,6 +64,7 @@ export const EMPTY_QUERY: CatalogQuery = {
   q: "",
   genres: [],
   decades: [],
+  unwatched: false,
   sort: "popular",
   fav: false,
 };
@@ -78,6 +81,7 @@ const KEYS = {
   fav: "fav",
   list: "list",
   pit: "yama",
+  unwatched: "unwatched",
 } as const;
 
 function all(sp: SearchParamsRecord, key: string): string[] {
@@ -127,6 +131,7 @@ export function parseCatalogQuery(sp: SearchParamsRecord): CatalogQuery {
     fav,
     list: fav ? undefined : oneOf(WATCH_LISTS, first(sp, KEYS.list)),
     pit: !fav && !first(sp, KEYS.list) && first(sp, KEYS.pit) === "1" ? true : undefined,
+    unwatched: first(sp, KEYS.unwatched) === "1",
   };
 }
 
@@ -151,6 +156,7 @@ export function stringifyCatalogQuery(query: CatalogQuery): string {
   if (query.duration) p.set(KEYS.duration, query.duration);
   if (query.country) p.set(KEYS.country, query.country);
   if (query.sort !== "popular") p.set(KEYS.sort, query.sort);
+  if (query.unwatched) p.set(KEYS.unwatched, "1");
   if (query.fav) p.set(KEYS.fav, "1");
   else if (query.list) p.set(KEYS.list, query.list);
   else if (query.pit) p.set(KEYS.pit, "1");

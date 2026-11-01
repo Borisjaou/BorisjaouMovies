@@ -39,6 +39,7 @@ describe("parseCatalogQuery", () => {
       sort: "new",
       fav: true,
       list: undefined,
+      unwatched: false,
     });
   });
 
@@ -93,6 +94,16 @@ describe("Списки просмотра в URL", () => {
     expect(catalogHref(withShelf(EMPTY_QUERY, "watched"))).toBe("/?list=watched");
     expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), "favorites"))).toBe("/?fav=1");
     expect(catalogHref(withShelf(withShelf(EMPTY_QUERY, "watched"), null))).toBe("/");
+  });
+});
+
+describe("«Не смотрел» в URL", () => {
+  it("unwatched=1 туда и обратно, в фильтры сервера не попадает", () => {
+    const q = parseCatalogQuery({ unwatched: "1", sort: "new" });
+    expect(q.unwatched).toBe(true);
+    expect(stringifyCatalogQuery(q)).toBe("sort=new&unwatched=1");
+    expect(parseCatalogQuery({}).unwatched).toBe(false);
+    expect(toFilmFilters(q)).not.toHaveProperty("unwatched");
   });
 });
 

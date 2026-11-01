@@ -54,11 +54,20 @@ describe("getFilms — сортировка", () => {
     ]);
   });
 
-  it("Новые — при равном годе сохраняется порядок данных", async () => {
-    expect(await titles({ sort: "new" })).toEqual([
-      "Тихий берег", "Лимонное лето", "Орбита 9", "Северный ветер", "Код тишины",
-      "Бумажный кит", "Ночная смена", "Город в тумане", "Звёздная пыль", "Весёлый переполох",
-    ]);
+  it("Новые — последние добавленные первыми", async () => {
+    // Данные эталона добавлены по порядку id: новые первыми = id по убыванию
+    const ids = (await repo.getFilms({ sort: "new" })).items.map((f) => f.id);
+    expect(ids).toEqual([...ids].sort((a, b) => b - a));
+    await addFilms([{ title: "Только что добавлен", year: 1950, popularity: -5 }]);
+    expect((await titles({ sort: "new" }))[0]).toBe("Только что добавлен");
+  });
+
+  it("excludeIds: «Не смотрел» — без просмотренных", async () => {
+    const all = await count();
+    const orbita = await repo.getFilmBySlug("orbita-9");
+    if (!orbita) throw new Error("нет данных");
+    expect(await count({ excludeIds: [orbita.id] })).toBe(all - 1);
+    expect(await titles({ excludeIds: [orbita.id], query: "орбита" })).toEqual([]);
   });
 });
 
@@ -146,7 +155,7 @@ describe("getFilms — пагинация по 20 и выборка по id", ()
 
   it("ids + фильтры + сортировка", async () => {
     expect(await titles({ ids: [8, 5, 2, 999] })).toEqual(["Орбита 9", "Бумажный кит", "Звёздная пыль"]);
-    expect(await titles({ ids: [8, 5, 2], sort: "new" })).toEqual(["Орбита 9", "Бумажный кит", "Звёздная пыль"]);
+    expect(await titles({ ids: [8, 5, 2], sort: "new" })).toEqual(["Звёздная пыль", "Бумажный кит", "Орбита 9"]);
     expect(await titles({ ids: [8, 5, 2], genres: ["Фантастика"] })).toEqual(["Орбита 9", "Звёздная пыль"]);
     expect(await titles({ ids: [11] })).toEqual([]);
   });

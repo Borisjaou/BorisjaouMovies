@@ -15,7 +15,7 @@ function toggle<T>(list: readonly T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
-/** Панель фильтров слева (DeskCatalog): годы, жанры */
+/** Панель фильтров слева (DeskCatalog): просмотр, годы, жанры */
 export function FilterPanel({ query, onChange, className }: FilterPanelProps) {
   return (
     <aside aria-label="Фильтры" className={cx(styles.panel, className)}>
@@ -23,12 +23,25 @@ export function FilterPanel({ query, onChange, className }: FilterPanelProps) {
         <h2 className={styles.title}>Фильтры</h2>
         <button
           type="button"
-          onClick={() => onChange({ genres: [], decades: [] })}
+          onClick={() => onChange({ genres: [], decades: [], unwatched: false })}
           className={styles.reset}
         >
           Сбросить
         </button>
       </div>
+
+      {/* Не из эталона: фильмы без отметки «Просмотрено» */}
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.legend}>Просмотр</legend>
+        <label className={styles.check}>
+          <input
+            type="checkbox"
+            checked={query.unwatched}
+            onChange={() => onChange({ unwatched: !query.unwatched })}
+          />
+          Не смотрел
+        </label>
+      </fieldset>
 
       <fieldset className={styles.fieldset}>
         <legend className={styles.legend}>Годы выпуска</legend>

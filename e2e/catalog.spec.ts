@@ -59,6 +59,41 @@ test.describe("Поиск", () => {
   });
 });
 
+test.describe("«Не смотрел»", () => {
+  test("без фильмов с отметкой «Просмотрено»; отмеченный пропадает сразу", async ({ page }, testInfo) => {
+    await page.goto("/");
+    const orbita = catalogCards(page).filter({ hasText: "Орбита 9" });
+    await orbita.getByRole("button", { name: "Отметить как просмотренный" }).click();
+    await expect(orbita.getByRole("button", { name: "Убрать из «Просмотрено»" })).toBeVisible();
+
+    if (isDesktop(testInfo)) {
+      await page.getByRole("radio", { name: "Не смотрел" }).click();
+      await expect(page.getByRole("checkbox", { name: "Не смотрел" })).toBeChecked();
+    } else {
+      // Мобила: кнопка сортировки по кругу — Популярные → Новые → Не смотрел
+      await page.getByRole("button", { name: "Популярные" }).click();
+      await page.getByRole("button", { name: "Новые" }).click();
+      await expect(page.getByRole("button", { name: "Не смотрел" })).toBeVisible();
+    }
+    await expect(page).toHaveURL(/unwatched=1/);
+    await expect(catalogCards(page).first()).toBeVisible();
+    await expect(catalogCards(page).filter({ hasText: "Орбита 9" })).toHaveCount(0);
+
+    const tihiy = catalogCards(page).filter({ hasText: "Тихий берег" });
+    await tihiy.getByRole("button", { name: "Отметить как просмотренный" }).click();
+    await expect(tihiy).toHaveCount(0);
+  });
+
+  test("мобила: «Не смотрел» на экране фильтров", async ({ page }, testInfo) => {
+    test.skip(isDesktop(testInfo), "на ПК — панель слева");
+    await page.goto("/filters");
+    await page.getByRole("button", { name: "Не смотрел" }).click();
+    await page.getByRole("link", { name: "Показать фильмы" }).click();
+    await expect(page).toHaveURL(/unwatched=1/);
+    await expect(page.getByRole("button", { name: "Не смотрел" })).toBeVisible();
+  });
+});
+
 test.describe("Фильтры", () => {
   test("мобила: экран фильтров → каталог с параметрами в URL", async ({ page }, testInfo) => {
     test.skip(isDesktop(testInfo), "на ПК фильтры в панели слева");

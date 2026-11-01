@@ -24,6 +24,8 @@ interface Draft {
   decades: DecadeId[];
   genres: Genre[];
   duration: DurationOptionId | null;
+  /** «Не смотрел»: без фильмов из «Просмотрено» */
+  unwatched: boolean;
   from: string;
   to: string;
   country: Country | "";
@@ -33,6 +35,7 @@ const EMPTY_DRAFT: Draft = {
   decades: [],
   genres: [],
   duration: null,
+  unwatched: false,
   from: "",
   to: "",
   country: "",
@@ -43,6 +46,7 @@ function fromQuery(q: CatalogQuery): Draft {
     decades: q.decades,
     genres: q.genres,
     duration: q.duration ?? null,
+    unwatched: q.unwatched,
     from: q.yearFrom !== undefined ? String(q.yearFrom) : "",
     to: q.yearTo !== undefined ? String(q.yearTo) : "",
     country: q.country ?? "",
@@ -72,13 +76,15 @@ export function FiltersView({ query }: { query: CatalogQuery }) {
   const count =
     draft.decades.length +
     draft.genres.length +
-    (draft.duration !== null ? 1 : 0);
+    (draft.duration !== null ? 1 : 0) +
+    (draft.unwatched ? 1 : 0);
 
   const applyHref = catalogHref({
     ...query,
     decades: draft.decades,
     genres: draft.genres,
     duration: draft.duration ?? undefined,
+    unwatched: draft.unwatched,
     yearFrom: year(draft.from),
     yearTo: year(draft.to),
     country: draft.country || undefined,
@@ -97,6 +103,20 @@ export function FiltersView({ query }: { query: CatalogQuery }) {
       </header>
 
       <main className={styles.main}>
+        {/* Не из эталона: фильмы без отметки «Просмотрено» */}
+        <section className={styles.section}>
+          <h2 className={styles.h2}>Просмотр</h2>
+          <div className={styles.chips}>
+            <Chip
+              size="sm"
+              check
+              label="Не смотрел"
+              on={draft.unwatched}
+              onClick={() => set({ unwatched: !draft.unwatched })}
+            />
+          </div>
+        </section>
+
         <section className={styles.section}>
           <h2 className={styles.h2}>Годы выпуска</h2>
           <div className={styles.years}>

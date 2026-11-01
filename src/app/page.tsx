@@ -24,7 +24,8 @@ export default async function CatalogPage({ searchParams }: Props) {
   const query = parseCatalogQuery(await searchParams);
   const [page, freshFilms, viewer] = await Promise.all([
     // В разделах-списках (избранное, «Надо посмотреть», «Просмотрено») фильмы грузятся на клиенте по id
-    shelfOf(query) ? Promise.resolve(EMPTY_PAGE) : getFilms(toFilmFilters(query)),
+    // «Не смотрел» — тоже на клиенте: список просмотренных у зрителя
+    shelfOf(query) || query.unwatched ? Promise.resolve(EMPTY_PAGE) : getFilms(toFilmFilters(query)),
     // Мобила: лента до 10 новинок; ПК показывает первые 3
     getNewFilms(NEW_FILMS_LIMIT),
     getViewer(),

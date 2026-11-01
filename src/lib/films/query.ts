@@ -13,6 +13,7 @@ export function buildFilmWhere(filters: FilmFilters): Prisma.FilmWhereInput {
   if (status !== "all") and.push({ status });
 
   if (filters.ids) and.push({ id: { in: [...filters.ids] } });
+  if (filters.excludeIds?.length) and.push({ id: { notIn: [...filters.excludeIds] } });
 
   // «Яма»: только «не понравился». Без ids (каталог, новинки, похожие) такие фильмы скрыты
   if (filters.pit) and.push({ verdict: "disliked" });
@@ -49,7 +50,8 @@ export function buildFilmWhere(filters: FilmFilters): Prisma.FilmWhereInput {
 export function buildFilmOrderBy(sort: SortId = "popular"): Prisma.FilmOrderByWithRelationInput[] {
   switch (sort) {
     case "new":
-      return [{ year: "desc" }, { id: "asc" }];
+      // Последние добавленные — первыми
+      return [{ createdAt: "desc" }, { id: "desc" }];
     case "popular":
       return [{ popularity: "desc" }, { id: "asc" }];
   }

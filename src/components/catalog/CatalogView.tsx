@@ -17,7 +17,7 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Toast } from "@/components/ui/Toast";
 import { cx } from "@/lib/cx";
 import { useListFilms } from "@/lib/favorites";
-import { CATALOG_GENRES, FILM_LINK_BASE, SORT_OPTIONS, type Genre } from "@/lib/films/constants";
+import { CATALOG_GENRES, FILM_LINK_BASE, VIEW_OPTIONS, type Genre, type ViewId } from "@/lib/films/constants";
 import { catalogHref, shelfOf, stringifyCatalogQuery, withShelf, type CatalogQuery } from "@/lib/films/params";
 import type { Film, FilmPage } from "@/lib/films/types";
 import { groupByVerdict, PIT } from "@/lib/films/verdictGroups";
@@ -27,6 +27,7 @@ import { useShelves } from "@/lib/useShelf";
 import { useToast } from "@/lib/useToast";
 import { FilterPanel } from "./FilterPanel";
 import { useLoadMore } from "./useLoadMore";
+import { useUnwatchedFilms } from "./useUnwatchedFilms";
 import styles from "./CatalogView.module.scss";
 
 const SEARCH_DELAY_MS = 300;
@@ -119,15 +120,20 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
   // ---- Список ----
   // Каталог: первая страница с сервера + подгрузка следующих при прокрутке (по 20)
   const listKey = stringifyCatalogQuery(shelf ? withShelf(query, null) : query);
-  const { items: catalogItems, total: catalogTotal, hasMore, attachSentinel } = useLoadMore(page, listKey, shelf === null);
+  // «Не смотрел»: без фильмов из «Просмотрено» зрителя — список целиком с клиента
+  const unwatched = query.unwatched;
+  const serverPaged = shelf === null && !unwatched;
+  const { items: catalogItems, total: catalogTotal, hasMore, attachSentinel } = useLoadMore(page, listKey, serverPaged);
+  const unwatchedList = useUnwatchedFilms(shelves.watched, listKey, shelf === null && unwatched);
   // Раздел-список (ПК): фильмы из списка с теми же фильтрами и сортировкой
   const shelfApi = shelves[shelf ?? "favorites"];
   const shelfList = useListFilms(shelfApi, listKey, shelf !== null);
 
-  const list = shelf ? (shelfList ?? []) : catalogItems;
-  // Пока список не загружен, в режиме раздела не показываем ни фильмы, ни «пусто»
-  const pending = shelf !== null && shelfList === null;
-  const total = shelf ? list.length : catalogTotal;
+  const rawList = shelf ? shelfList : unwatched ? unwatchedList : catalogItems;
+  const list = (rawList ?? []).filter((f) => !unwatched || !shelves.watched.has(f.id));
+  // Пока список не загружен, в режиме раздела / «Не смотрел» не показываем ни фильмы, ни «пусто»
+  const pending = rawList === null;
+  const total = serverPaged ? catalogTotal : list.length;
   const countLabel = `${total} ${plural(total, FILM_FORMS)}`;
 
   // Админу после отметки «Просмотрено» — окно «Как вам фильм?» (ИМХО)
@@ -147,14 +153,18 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
   const toggleGenre = (g: Genre) =>
     pickSection({ genres: query.genres.includes(g) ? query.genres.filter((x) => x !== g) : [...query.genres, g] });
 
-  const sortIndex = SORT_OPTIONS.findIndex((s) => s.id === query.sort);
-  const cycleSort = () => update({ sort: SORT_OPTIONS[(sortIndex + 1) % SORT_OPTIONS.length].id });
+  // Переключатель: «Популярные» / «Новые» / «Не смотрел» (новые первыми)
+  const view: ViewId = unwatched ? "unwatched" : query.sort;
+  const setView = (id: ViewId) =>
+    update(id === "unwatched" ? { unwatched: true, sort: "new" } : { unwatched: false, sort: id });
+  const viewIndex = VIEW_OPTIONS.findIndex((v) => v.id === view);
+  const cycleSort = () => setView(VIEW_OPTIONS[(viewIndex + 1) % VIEW_OPTIONS.length].id);
 
   const emptyShelf = shelf !== null && shelfApi.count === 0;
   // «Яма» без поиска и фильтров пуста — особый текст
   const pit = shelf === null && query.pit === true;
   const emptyPit =
-    pit && !query.q.trim() && query.genres.length === 0 && query.decades.length === 0 && catalogTotal === 0;
+    pit && !unwatched && !query.q.trim() && query.genres.length === 0 && query.decades.length === 0 && list.length === 0;
   const sectionTitle = shelf ? SHELVES[shelf].title : pit ? PIT.title : null;
   // «Просмотрено» на ПК делится на группы по ИМХО
   const groups = shelf === "watched" ? groupByVerdict(list) : null;
@@ -251,7 +261,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
             <div className={cx(styles.mCatalogHead, "only-mobile")}>
               <h2 className={styles.mCatalogTitle}>Каталог</h2>
               <button type="button" onClick={cycleSort} className={styles.mSort}>
-                {SORT_OPTIONS[sortIndex].label}
+                {VIEW_OPTIONS[viewIndex].label}
                 <Icon name="sort" size={16} />
               </button>
             </div>
@@ -267,9 +277,9 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
                 <span className={styles.dCount}>{pending ? "" : countLabel}</span>
               </div>
               <Segmented
-                options={SORT_OPTIONS}
-                value={query.sort}
-                onChange={(sort) => update({ sort })}
+                options={VIEW_OPTIONS}
+                value={view}
+                onChange={setView}
                 ariaLabel="Сортировка"
                 layout="inline"
                 compact
@@ -301,7 +311,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
               <div className={styles.grid}>
                 {list.map(card)}
                 {/* Невидимая метка: когда доходит до экрана, подгружается следующая страница */}
-                {!shelf && hasMore && <div ref={attachSentinel} aria-hidden="true" />}
+                {serverPaged && hasMore && <div ref={attachSentinel} aria-hidden="true" />}
               </div>
             ) : (
               <>
@@ -328,7 +338,7 @@ export function CatalogView({ page, freshFilms, query, isAdmin }: CatalogViewPro
                   <button
                     type="button"
                     onClick={() =>
-                      resetTo({ q: "", genres: [], decades: [], sort: query.sort, fav: false })
+                      resetTo({ q: "", genres: [], decades: [], sort: query.sort, fav: false, unwatched: false })
                     }
                     className={styles.dEmptyButton}
                   >

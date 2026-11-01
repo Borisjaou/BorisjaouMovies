@@ -42,12 +42,19 @@ export type DurationOptionId = (typeof DURATION_OPTIONS)[number]["id"];
 export const COUNTRIES = ["Россия", "США", "Франция", "Южная Корея", "Япония"] as const;
 export type Country = (typeof COUNTRIES)[number];
 
-/** Сортировка каталога: подписи из Catalog / DeskCatalog */
+/** Сортировка каталога: подписи из Catalog / DeskCatalog. «Новые» — по дате добавления */
 export const SORT_OPTIONS = [
   { id: "popular", label: "Популярные" },
   { id: "new", label: "Новые" },
 ] as const;
 export type SortId = (typeof SORT_OPTIONS)[number]["id"];
+
+/**
+ * Переключатель над каталогом: сортировки + «Не смотрел» (не из эталона) —
+ * фильмы без отметки «Просмотрено», новые первыми.
+ */
+export const VIEW_OPTIONS = [...SORT_OPTIONS, { id: "unwatched", label: "Не смотрел" }] as const;
+export type ViewId = (typeof VIEW_OPTIONS)[number]["id"];
 
 /** Базовый адрес ссылки на фильм (Movie: borisjaou.app/film/orbita-9) */
 export const FILM_LINK_BASE = "borisjaou.app/film/";
