@@ -80,7 +80,8 @@ export function createFilmsRepository(db: PrismaClient) {
   async function getNewFilms(limit?: number): Promise<Film[]> {
     const rows = await db.film.findMany({
       where: { status: "published", isNew: true, ...NOT_IN_PIT },
-      orderBy: { id: "asc" },
+      // Последние добавленные — первыми: иначе новые фильмы не попадали в «Новинки» (там были самые старые)
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       include: FILM_INCLUDE,
       take: limit,
     });

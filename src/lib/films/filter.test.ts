@@ -161,9 +161,14 @@ describe("getFilmBySlug / getNewFilms / getSimilarFilms", () => {
     expect(await repo.getFilmBySlug("net-takogo")).toBeNull();
   });
 
-  it("getNewFilms: опубликованные с isNew в порядке данных, limit 3", async () => {
-    expect((await repo.getNewFilms()).map((f) => f.title)).toEqual(["Тихий берег", "Орбита 9", "Лимонное лето", "Северный ветер"]);
-    expect((await repo.getNewFilms(3)).map((f) => f.title)).toEqual(["Тихий берег", "Орбита 9", "Лимонное лето"]);
+  it("getNewFilms: опубликованные с isNew, последние добавленные первыми, limit", async () => {
+    expect((await repo.getNewFilms()).map((f) => f.title)).toEqual(["Северный ветер", "Лимонное лето", "Орбита 9", "Тихий берег"]);
+    expect(await repo.getNewFilms(3)).toHaveLength(3);
+  });
+
+  it("getNewFilms: только что добавленная новинка — первая", async () => {
+    await addFilms([{ title: "Свежая новинка", isNew: true }]);
+    expect((await repo.getNewFilms(3))[0].title).toBe("Свежая новинка");
   });
 
   it("getSimilarFilms: общие жанры, затем популярность; без самого фильма и черновиков", async () => {

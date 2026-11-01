@@ -80,6 +80,11 @@
   font-size: 14px;
   line-height: 1.4;
   max-width: 320px;
+  /* Длинное описание (автозаполнение) — не больше 4 строк, иначе карточки разной высоты */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 
   @include bp.below(lg) {
     display: none;

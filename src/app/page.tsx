@@ -16,6 +16,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 }
 
+const NEW_FILMS_LIMIT = 10;
+
 const EMPTY_PAGE: FilmPage = { items: [], total: 0, page: 1, pageSize: 20, hasMore: false };
 
 export default async function CatalogPage({ searchParams }: Props) {
@@ -23,7 +25,8 @@ export default async function CatalogPage({ searchParams }: Props) {
   const [page, freshFilms, viewer] = await Promise.all([
     // В разделах-списках (избранное, «Надо посмотреть», «Просмотрено») фильмы грузятся на клиенте по id
     shelfOf(query) ? Promise.resolve(EMPTY_PAGE) : getFilms(toFilmFilters(query)),
-    getNewFilms(),
+    // Мобила: лента до 10 новинок; ПК показывает первые 3
+    getNewFilms(NEW_FILMS_LIMIT),
     getViewer(),
   ]);
 
